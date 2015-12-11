@@ -1,0 +1,53 @@
+apply plugin: 'com.android.library'
+
+ext {
+    bintrayRepo = 'maven'
+    bintrayName = 'stickandroidsdk'
+
+    publishedGroupId = 'io.logbase.stickandroidsdk'
+    libraryName = 'StickAndroidSDK'
+    artifact = 'stickandroidsdk'
+
+    libraryDescription = 'Android SDK to send data to Stick API'
+
+    siteUrl = 'https://github.com/cyberabis/stick-mobile'
+    gitUrl = 'https://github.com/cyberabis/stick-mobile.git'
+
+    libraryVersion = '0.0.9'
+
+    developerId = 'abishek'
+    developerName = 'Abishek Baskaran'
+    developerEmail = 'babishek@gmail.com'
+
+    licenseName = 'The Apache Software License, Version 2.0'
+    licenseUrl = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+    allLicenses = ["Apache-2.0"]
+}
+
+android {
+    compileSdkVersion 22
+    buildToolsVersion "21.1.2"
+
+    defaultConfig {
+        minSdkVersion 14
+        targetSdkVersion 22
+        versionCode 100000
+        versionName "1.0.0"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile 'com.android.support:appcompat-v7:22.0.0'
+    compile 'com.google.android.gms:play-services:6.1.11'
+    compile 'com.android.support:support-v4:22.0.0'
+}
+
+apply from: 'https://raw.githubusercontent.com/nuuneoi/JCenter/master/installv1.gradle'
+apply from: 'https://raw.githubusercontent.com/nuuneoi/JCenter/master/bintrayv1.gradle'

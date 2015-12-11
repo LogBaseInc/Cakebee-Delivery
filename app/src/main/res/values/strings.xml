@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">cakebee-delivery</string>
+
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="friebaseurl">https://logbasedev.firebaseio.com/</string>
+    <string name="time">Time slot: </string>
+    <string name="name">Name: </string>
+    <string name="address">Address: </string>
+    <string name="mobile">Mobile: </string>
+    <string name="amount">Amount to collect: </string>
+    <string name="goback">Go back</string>
+    <string name="pickup">PickUp</string>
+    <string name="lastupdatesentat">Last update sent at</string>
+    <string name="delivered">Delivered</string>
+
+</resources>
