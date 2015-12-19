@@ -5,22 +5,14 @@ package io.logbase.cakebeedelivery;
  */
 
 import android.app.ListActivity;
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.media.RingtoneManager;
-import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.TextView;
-import android.widget.Button;
 import android.widget.ListView;
 import android.view.View;
 import android.widget.Toast;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.firebase.client.Firebase;
 import com.firebase.client.ValueEventListener;
@@ -35,7 +27,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ArrayList;
 import java.text.SimpleDateFormat;
-import io.logbase.cakebeedelivery.MainActivity.NotificationReceiver;
+import android.app.Activity;
 
 public class OrdersActivity extends ListActivity {
     List<OrderDetails> orderDetaillist;
@@ -99,6 +91,14 @@ public class OrdersActivity extends ListActivity {
                                         orderdet.Name = upperCaseFirst(orderdet.Name);
                                         orderdet.Id = entry.getKey();
                                         orderDetaillist.add(orderdet);
+                                    }
+                                    else if((orderdet.Pickedon != null && orderdet.Pickedon != "") && (orderdet.Deliveredon == null || orderdet.Deliveredon == "")) {
+                                        Activity currentActivity = ((MyApp)context.getApplicationContext()).getCurrentActivity();
+                                        if(currentActivity.getClass() == OrdersActivity.class) {
+                                            orderdet.Name = upperCaseFirst(orderdet.Name);
+                                            orderdet.Id = entry.getKey();
+                                            showOrderDetails(orderdet);
+                                        }
                                     }
                                 }
                             }
@@ -170,6 +170,8 @@ public class OrdersActivity extends ListActivity {
     public void onResume()
     {
         super.onResume();
+        ((MyApp) context.getApplicationContext()).setCurrentActivity(this);
+
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
         currentDate = sdf.format(new java.util.Date());
 
@@ -186,9 +188,7 @@ public class OrdersActivity extends ListActivity {
         }
     }
 
-    @Override
-    protected void onListItemClick(ListView l, View v, int position, long id) {
-        OrderDetails orderDetails = orderDetaillist.get(position);
+    private void showOrderDetails(OrderDetails orderDetails) {
         String orderjson = "";
         ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
         try {
@@ -200,5 +200,10 @@ public class OrdersActivity extends ListActivity {
         Intent intent = new Intent(this, OrderDetailActivity.class);
         intent.putExtra("Order",orderjson);
         startActivity(intent);
+    }
+    @Override
+    protected void onListItemClick(ListView l, View v, int position, long id) {
+        OrderDetails orderDetails = orderDetaillist.get(position);
+        showOrderDetails(orderDetails);
     }
 }

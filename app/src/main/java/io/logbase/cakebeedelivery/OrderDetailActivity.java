@@ -5,15 +5,11 @@ package io.logbase.cakebeedelivery;
  */
 
 import android.app.Activity;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.os.Bundle;
-import android.support.v4.content.LocalBroadcastManager;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -28,7 +24,6 @@ import android.graphics.PorterDuff;
 import android.widget.Toast;
 import android.content.DialogInterface;
 import android.app.AlertDialog;
-import java.util.Calendar;
 
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
@@ -39,7 +34,6 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
 import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
 import com.google.android.gms.location.LocationServices;
-import io.logbase.stickandroidsdk.StickMobile;
 
 public class OrderDetailActivity extends Activity implements ConnectionCallbacks, OnConnectionFailedListener {
     public static Activity myActivity;
@@ -48,8 +42,6 @@ public class OrderDetailActivity extends Activity implements ConnectionCallbacks
     Context context;
     GoogleApiClient mGoogleApiClient;
 
-    //private StickMobile stick;
-    //private Integer frequency = 10;
     private boolean ispickedup = false;
     private String deviceID;
     private String accountID;
@@ -74,6 +66,12 @@ public class OrderDetailActivity extends Activity implements ConnectionCallbacks
         initialize();
         //TrackingSettings();
         checkIsPickedup();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        ((MyApp) context.getApplicationContext()).setCurrentActivity(this);
     }
 
     @Override
@@ -145,7 +143,6 @@ public class OrderDetailActivity extends Activity implements ConnectionCallbacks
         builder.setMessage(orderdetail.Amount >0 ? ("Confirm the delivery and the amount Rs."+ orderdetail.Amount)  : "Confirm the delivery")
                 .setPositiveButton("Yes", dialogClickListener)
                 .setNegativeButton("No", dialogClickListener).show();
-
     }
 
     public void DeliverdConfirmed() {
@@ -204,14 +201,11 @@ public class OrderDetailActivity extends Activity implements ConnectionCallbacks
         Location mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
                 mGoogleApiClient);
         if (mLastLocation != null) {
-            //ShowToast("getlocation: " + mLastLocation);
-
             Firebase myFirebaseRef = new Firebase(getString(R.string.friebaseurl)+"accounts/"+accountID+"/orders/"+deviceID+"/"+currentDate+"/"+orderdetail.Id+"/"+attext);
             myFirebaseRef.setValue(mLastLocation.getLatitude() +" " +mLastLocation.getLongitude());
 
         }
         else {
-            //ShowToast("getlocation null");
         }
     }
 
@@ -279,16 +273,6 @@ public class OrderDetailActivity extends Activity implements ConnectionCallbacks
         //dont call **super**, if u want disable back button in current screen.
     }
 
-    /*private void TrackingSettings() {
-        IntentFilter mStatusIntentFilter = new IntentFilter("STICK_MOBILE_BROADCAST");
-        // Instantiates a new DownloadStateReceiver
-        StatusReceiver mStatusReceiver = new StatusReceiver();
-        // Registers the DownloadStateReceiver and its intent filters
-        LocalBroadcastManager.getInstance(this).registerReceiver(
-                mStatusReceiver,
-                mStatusIntentFilter);
-    }*/
-
     private void startTracking(String deviceID) {
         Button pickupbtn = (Button)findViewById(R.id.pickupbtn);
         pickupbtn.setVisibility(View.GONE);
@@ -301,28 +285,11 @@ public class OrderDetailActivity extends Activity implements ConnectionCallbacks
         lastupdatelayout.setVisibility(View.VISIBLE);
 
         ((MyApp)this.getApplication()).startOrderTracking();
-
-        /*if(stick == null) {
-            stick = new StickMobile(this, deviceID, frequency, null);
-        }
-
-        //Using SDK starts
-        boolean stickStarted = false;
-        if (stick != null && stick.isRunning() == false) {
-            stickStarted = stick.start();
-        }
-
-        if (!stickStarted)
-            ShowToast("Unable to start if blank device ID, no Network or GPS");*/
     }
 
     private void stopTracking() {
         //Stop order tracking and start default tracking
         ((MyApp) this.getApplication()).startDefaultTracking();
-
-        /*//Using SDK ends
-        if (stick != null)
-            stick.stop();*/
     }
 
     private void checkIsPickedup(){
@@ -342,24 +309,5 @@ public class OrderDetailActivity extends Activity implements ConnectionCallbacks
             }
         });
     }
-
-    /*public class StatusReceiver extends BroadcastReceiver {
-        private static final String LOG_TAG = "StickStatusReceiver";
-        // Called when the BroadcastReceiver gets an Intent it's registered to receive
-        public void onReceive(Context context, Intent intent) {
-            String status = intent.getExtras().getString("SERVICE_STATUS");
-            Log.i(LOG_TAG, "Received status: " + status);
-            if((status != null)&&(status.equals("STOP"))) {
-                ShowToast("Unable to run service, check if GPS and Network is connected");
-            }
-            else {
-                //Received data that was sent to server
-                TextView clock = (TextView) findViewById(R.id.clock);
-                Calendar cal = Calendar.getInstance();
-                String date = android.text.format.DateFormat.format("MMM dd, yyyy hh:mm:ss a", cal.getTime()).toString();
-                clock.setText(date);
-            }
-        }
-    }*/
 
 }

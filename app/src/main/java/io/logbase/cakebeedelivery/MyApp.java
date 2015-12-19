@@ -15,6 +15,7 @@ import android.util.Log;
 import android.widget.Toast;
 import java.util.Calendar;
 import android.widget.TextView;
+import android.app.Activity;
 
 public class MyApp extends Application {
 
@@ -83,6 +84,14 @@ public class MyApp extends Application {
     private void ShowToast(String message) {
         Toast toast = Toast.makeText(this, message, Toast.LENGTH_SHORT);
         toast.show();
+    }
+
+    private Activity mCurrentActivity = null;
+    public Activity getCurrentActivity(){
+        return mCurrentActivity;
+    }
+    public void setCurrentActivity(Activity mCurrentActivity){
+        this.mCurrentActivity = mCurrentActivity;
     }
 
     public class StatusReceiver extends BroadcastReceiver {

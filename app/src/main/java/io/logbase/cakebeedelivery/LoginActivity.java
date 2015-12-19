@@ -11,7 +11,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.Toast;
 
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
@@ -47,11 +46,19 @@ public class LoginActivity extends Activity implements ConnectionCallbacks, OnCo
     @Override
     public void onResume() {
         super.onResume();
+        ((MyApp)context.getApplicationContext()).setCurrentActivity(this);
+
         Firebase.setAndroidContext(this);
+
+        SharedPreferences sharedPref = getSharedPreferences(getString(R.string.app_name), Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putString("TrackDefault", "true");
+        editor.putInt("TrackDefaultFreq", 30);
+        editor.putInt("TrackOrderFreq", 10);
+        editor.commit();
 
         getConfig();
 
-        SharedPreferences sharedPref = getSharedPreferences(getString(R.string.app_name), Context.MODE_PRIVATE);
         deviceID = sharedPref.getString("deviceID", null);
         accountID = sharedPref.getString("accountID", null);
 
@@ -92,17 +99,17 @@ public class LoginActivity extends Activity implements ConnectionCallbacks, OnCo
         editor.putString("loggedinDate", currentDate);
         editor.commit();
 
-        //((MyApp) this.getApplication()).startDefaultTracking();
+        startDefaultTracking();
 
         getlocation();
     }
 
     public void stopTracking() {
-        //((MyApp)this.getApplication()).stopTracking();
+        ((MyApp)context.getApplicationContext()).stopTracking();
     }
 
     public void startDefaultTracking() {
-        //((MyApp)this.getApplication()).startDefaultTracking();
+        ((MyApp)context.getApplicationContext()).startDefaultTracking();
     }
 
     private void GoToOrders() {

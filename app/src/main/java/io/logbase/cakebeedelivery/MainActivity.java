@@ -29,7 +29,6 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.widget.TextView;
-import android.media.AudioManager;
 
 public class MainActivity extends Activity {
 
@@ -65,6 +64,12 @@ public class MainActivity extends Activity {
                 startActivity(intent);
             }
         }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        ((MyApp) context.getApplicationContext()).setCurrentActivity(this);
     }
 
     @Override
@@ -236,7 +241,7 @@ public class MainActivity extends Activity {
             NotificationManager notificationManager = (NotificationManager) context
                     .getSystemService(Context.NOTIFICATION_SERVICE);
             Notification notification = new Notification.Builder(this)
-                    .setContentTitle("Cakebee")
+                    .setContentTitle("Delivery")
                     .setContentText("New order has been assigned")
                     .setSmallIcon(R.drawable.icon)
                     .setSound(soundUri)
