@@ -21,7 +21,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import android.graphics.PorterDuff;
-import android.widget.Toast;
 import android.content.DialogInterface;
 import android.app.AlertDialog;
 
@@ -41,6 +40,7 @@ public class OrderDetailActivity extends Activity implements ConnectionCallbacks
     OrderDetails orderdetail;
     Context context;
     GoogleApiClient mGoogleApiClient;
+    LBProcessDialog mDialog = null;
 
     private boolean ispickedup = false;
     private String deviceID;
@@ -53,6 +53,7 @@ public class OrderDetailActivity extends Activity implements ConnectionCallbacks
         setContentView(R.layout.order_detail);
         context = this;
         OrderDetailActivity.myActivity = this;
+        mDialog = new LBProcessDialog(this);
 
         SharedPreferences sharedPref = getSharedPreferences(getString(R.string.app_name), Context.MODE_PRIVATE);
         deviceID = sharedPref.getString("deviceID", null);
@@ -64,7 +65,6 @@ public class OrderDetailActivity extends Activity implements ConnectionCallbacks
         Firebase.setAndroidContext(this);
         setGoogleApiClient();
         initialize();
-        //TrackingSettings();
         checkIsPickedup();
     }
 
@@ -111,6 +111,8 @@ public class OrderDetailActivity extends Activity implements ConnectionCallbacks
     }
 
     public void pickupConfirmed() {
+        mDialog.StartProcessDialog();
+
         ispickedup = true;
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
@@ -146,6 +148,7 @@ public class OrderDetailActivity extends Activity implements ConnectionCallbacks
     }
 
     public void DeliverdConfirmed() {
+        mDialog.StartProcessDialog();
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
         String currentdateandtime = sdf.format(new java.util.Date());
@@ -205,13 +208,8 @@ public class OrderDetailActivity extends Activity implements ConnectionCallbacks
             myFirebaseRef.setValue(mLastLocation.getLatitude() +" " +mLastLocation.getLongitude());
 
         }
-        else {
-        }
-    }
 
-    private void ShowToast(String message) {
-        Toast toast = Toast.makeText(context, message, Toast.LENGTH_SHORT);
-        toast.show();
+        mDialog.StopProcessDialog();
     }
 
     private void initialize() {
@@ -228,6 +226,21 @@ public class OrderDetailActivity extends Activity implements ConnectionCallbacks
 
         orderdetail = mapper.convertValue(actualObj, OrderDetails.class);
 
+        Button pickupbtn = (Button)findViewById(R.id.pickupbtn);
+        pickupbtn.getBackground().setColorFilter(0xFF00b5ad, PorterDuff.Mode.MULTIPLY);
+
+        Button deliveredbtn = (Button)findViewById(R.id.deliveredbtn);
+        deliveredbtn.setVisibility(View.GONE);
+        deliveredbtn.getBackground().setColorFilter(0xFF00b5ad, PorterDuff.Mode.MULTIPLY);
+
+        RelativeLayout lastupdatelayout = (RelativeLayout)findViewById(R.id.lastupdatelayout);
+        lastupdatelayout.setVisibility(View.GONE);
+
+        getOrderDetails();
+
+    }
+
+    private void setOrderDetails() {
         TextView idlabel = (TextView)findViewById(R.id.idlabel);
         TextView timelabel = (TextView)findViewById(R.id.timelabel);
         TextView namelabel = (TextView)findViewById(R.id.namelabel);
@@ -253,17 +266,6 @@ public class OrderDetailActivity extends Activity implements ConnectionCallbacks
             }
             itemdetailslabel.setText(itemdetails);
         }
-
-        Button pickupbtn = (Button)findViewById(R.id.pickupbtn);
-        pickupbtn.getBackground().setColorFilter(0xFF00b5ad, PorterDuff.Mode.MULTIPLY);
-
-        Button deliveredbtn = (Button)findViewById(R.id.deliveredbtn);
-        deliveredbtn.setVisibility(View.GONE);
-        deliveredbtn.getBackground().setColorFilter(0xFF00b5ad, PorterDuff.Mode.MULTIPLY);
-
-        RelativeLayout lastupdatelayout = (RelativeLayout)findViewById(R.id.lastupdatelayout);
-        lastupdatelayout.setVisibility(View.GONE);
-
     }
 
     @Override
@@ -271,6 +273,22 @@ public class OrderDetailActivity extends Activity implements ConnectionCallbacks
         if(ispickedup == false)
             super.onBackPressed();
         //dont call **super**, if u want disable back button in current screen.
+    }
+
+    private void getOrderDetails() {
+        Firebase myFirebaseRef =  new Firebase(getString(R.string.friebaseurl)+"accounts/"+accountID+"/orders/"+deviceID+"/"+currentDate+"/"+orderdetail.Id);
+        myFirebaseRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                orderdetail = snapshot.getValue(OrderDetails.class);
+                setOrderDetails();
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+                System.out.println("The read failed: " + firebaseError.getMessage());
+            }
+        });
     }
 
     private void startTracking(String deviceID) {

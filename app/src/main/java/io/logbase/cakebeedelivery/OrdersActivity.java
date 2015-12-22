@@ -12,7 +12,6 @@ import android.os.Bundle;
 import android.widget.TextView;
 import android.widget.ListView;
 import android.view.View;
-import android.widget.Toast;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.firebase.client.Firebase;
 import com.firebase.client.ValueEventListener;
@@ -28,17 +27,21 @@ import java.util.List;
 import java.util.ArrayList;
 import java.text.SimpleDateFormat;
 import android.app.Activity;
+import java.util.Collections;
 
 public class OrdersActivity extends ListActivity {
     List<OrderDetails> orderDetaillist;
     Context context;
     String currentDate;
+    LBProcessDialog mDialog = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.orders);
         context = this;
+
+        mDialog = new LBProcessDialog(this);
     }
 
     private boolean CheckLoggedIn() {
@@ -88,6 +91,18 @@ public class OrdersActivity extends ListActivity {
                                 if (entry.getKey() != "LoggedOn" && entry.getKey() != "Loggedat") {
                                     OrderDetails orderdet = mapper.convertValue(entry.getValue(), OrderDetails.class);
                                     if ((orderdet.Pickedon == null || orderdet.Pickedon == "") && IsOrderValid(orderdet)) {
+                                        if(!(orderdet.Time.contains("Mid"))) {
+                                            String[] timesplit = orderdet.Time.split(":");
+                                            Boolean ispm = false;
+                                            if (timesplit[1].toLowerCase().indexOf("pm") >= 0 && Integer.parseInt(timesplit[0]) >= 1 && Integer.parseInt(timesplit[0]) <= 11) {
+                                                ispm = true;
+                                            }
+                                            orderdet.TimeSort = (Double.isNaN(Double.parseDouble(timesplit[0])) ? 24 : (ispm ? (Integer.parseInt(timesplit[0])+12) : Integer.parseInt(timesplit[0])));
+                                        }
+                                        else {
+                                            orderdet.TimeSort = 24;
+                                        }
+
                                         orderdet.Name = upperCaseFirst(orderdet.Name);
                                         orderdet.Id = entry.getKey();
                                         orderDetaillist.add(orderdet);
@@ -103,11 +118,14 @@ public class OrdersActivity extends ListActivity {
                                 }
                             }
 
+                            Collections.sort(orderDetaillist);
+
                             OrderlistAdapter listAdapter = new OrderlistAdapter(context, orderDetaillist);
                             setListAdapter(listAdapter);
                         }
 
                     } catch (IOException e) {
+                        mDialog.StopProcessDialog();
                         e.printStackTrace();
                     }
                 }
@@ -115,6 +133,8 @@ public class OrdersActivity extends ListActivity {
                 if (orderDetaillist.size() <= 0) {
                     NoOrders();
                 }
+
+                mDialog.StopProcessDialog();
 
                 SharedPreferences sharedPref = getSharedPreferences(getString(R.string.app_name), Context.MODE_PRIVATE);
                 SharedPreferences.Editor editor = sharedPref.edit();
@@ -127,11 +147,6 @@ public class OrdersActivity extends ListActivity {
                 System.out.println("The read failed: " + firebaseError.getMessage());
             }
         });
-    }
-
-    private void ShowToast(String message) {
-        Toast toast = Toast.makeText(context, message, Toast.LENGTH_SHORT);
-        toast.show();
     }
 
     private boolean IsOrderValid(OrderDetails orderdet) {
@@ -178,11 +193,14 @@ public class OrdersActivity extends ListActivity {
         TextView nolist = (TextView) findViewById(R.id.nolist);
         nolist.setVisibility(View.GONE);
 
+        mDialog.StartProcessDialog();
+
         if(CheckLoggedIn()) {
             Firebase.setAndroidContext(this);
             getOrders();
         }
         else{
+            mDialog.StopProcessDialog();
             Intent intent = new Intent(this, LoginActivity.class);
             startActivity(intent);
         }

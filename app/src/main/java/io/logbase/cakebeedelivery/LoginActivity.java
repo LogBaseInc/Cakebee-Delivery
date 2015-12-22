@@ -35,12 +35,15 @@ public class LoginActivity extends Activity implements ConnectionCallbacks, OnCo
     String accountID;
     String currentDate;
     GoogleApiClient mGoogleApiClient;
+    LBProcessDialog mDialog = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.login);
         context = this;
+
+        mDialog = new LBProcessDialog(this);
     }
 
     @Override
@@ -88,6 +91,8 @@ public class LoginActivity extends Activity implements ConnectionCallbacks, OnCo
     }
 
     public void login(View view) {
+        mDialog.StartProcessDialog();
+
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
         String currentdateandtime = sdf.format(new java.util.Date());
 
@@ -113,6 +118,8 @@ public class LoginActivity extends Activity implements ConnectionCallbacks, OnCo
     }
 
     private void GoToOrders() {
+        mDialog.StopProcessDialog();
+
         Intent intent = new Intent(this, OrdersActivity.class);
         startActivity(intent);
     }

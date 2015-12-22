@@ -7,13 +7,15 @@ import java.util.List;
 /**
  * Created by logbase on 20/11/15.
  */
-public class OrderDetails {
+public class OrderDetails implements Comparable {
     @JsonIgnoreProperties(ignoreUnknown = true)
     public String Id;
     @JsonIgnoreProperties(ignoreUnknown = true)
     public String Address;
     @JsonIgnoreProperties(ignoreUnknown = true)
     public String Name;
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public int TimeSort;
     @JsonIgnoreProperties(ignoreUnknown = true)
     public String Time;
     @JsonIgnoreProperties(ignoreUnknown = true)
@@ -30,6 +32,11 @@ public class OrderDetails {
     public String Deliveredat;
     @JsonIgnoreProperties(ignoreUnknown = true)
     public List<ItemDetails> Items;
+
+    @Override
+    public int compareTo(Object another) {
+        return this.TimeSort - ((OrderDetails)another).TimeSort;
+    }
 }
 
 

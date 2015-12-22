@@ -1,6 +1,7 @@
 package io.logbase.cakebeedelivery;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.view.Menu;
@@ -33,11 +34,15 @@ import android.widget.TextView;
 public class MainActivity extends Activity {
 
     Context context;
+    LBProcessDialog mDialog = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         context = this;
+        mDialog = new LBProcessDialog(this);
+
         Firebase.setAndroidContext(this);
 
         Button savebutton = (Button)findViewById(R.id.savebutton);
@@ -88,6 +93,8 @@ public class MainActivity extends Activity {
     }
 
     public void saveDeviceID(View view) {
+        mDialog.StartProcessDialog();
+
         EditText accountnameText = (EditText)findViewById(R.id.accountname);
         String accountname = accountnameText.getText().toString();
 
@@ -103,8 +110,8 @@ public class MainActivity extends Activity {
     }
 
     private void CheckDeviceId(String actname, String username) {
-        final String accountname = actname.toLowerCase();
-        username = username.toLowerCase();
+        final String accountname = actname.toLowerCase().trim();
+        username = username.toLowerCase().trim();
 
         final Button savebutton = (Button)findViewById(R.id.savebutton);
         savebutton.setEnabled(false);
@@ -135,17 +142,20 @@ public class MainActivity extends Activity {
         myFirebaseRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot snapshot) {
+                mDialog.StopProcessDialog();
                 GoToLogin(snapshot.getValue().toString(), deviceId);
             }
 
             @Override
             public void onCancelled(FirebaseError firebaseError) {
+                mDialog.StopProcessDialog();
                 System.out.println("The read failed: " + firebaseError.getMessage());
             }
         });
     }
 
     private void ShowToast(String message) {
+        mDialog.StopProcessDialog();
         Toast toast = Toast.makeText(context, message, Toast.LENGTH_SHORT);
         toast.show();
     }
