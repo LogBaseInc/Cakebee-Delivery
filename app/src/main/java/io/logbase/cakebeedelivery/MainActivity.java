@@ -1,7 +1,6 @@
 package io.logbase.cakebeedelivery;
 
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.view.Menu;
@@ -33,7 +32,7 @@ import android.widget.TextView;
 
 public class MainActivity extends Activity {
 
-    Context context;
+    public Context context;
     LBProcessDialog mDialog = null;
 
     @Override

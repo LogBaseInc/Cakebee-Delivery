@@ -12,5 +12,6 @@
     <string name="pickup">PickUp</string>
     <string name="lastupdatesentat">Last update sent at</string>
     <string name="delivered">Delivered</string>
+    <string name="viewroute">View Route</string>
 
 </resources>

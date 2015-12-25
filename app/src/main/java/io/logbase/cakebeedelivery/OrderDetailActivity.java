@@ -169,6 +169,11 @@ public class OrderDetailActivity extends Activity implements ConnectionCallbacks
         startActivity(intent);
     }
 
+    public void viewrouteclicked(View view){
+        Intent intent = new Intent(this, RouteActivity.class);
+        startActivity(intent);
+    }
+
     @Override
     public void onConnected(Bundle connectionHint) {
         //ShowToast("onConnected: ");
@@ -233,9 +238,6 @@ public class OrderDetailActivity extends Activity implements ConnectionCallbacks
         deliveredbtn.setVisibility(View.GONE);
         deliveredbtn.getBackground().setColorFilter(0xFF00b5ad, PorterDuff.Mode.MULTIPLY);
 
-        RelativeLayout lastupdatelayout = (RelativeLayout)findViewById(R.id.lastupdatelayout);
-        lastupdatelayout.setVisibility(View.GONE);
-
         getOrderDetails();
 
     }
@@ -266,12 +268,28 @@ public class OrderDetailActivity extends Activity implements ConnectionCallbacks
             }
             itemdetailslabel.setText(itemdetails);
         }
+
+        Button pickupbtn = (Button)findViewById(R.id.pickupbtn);
+        Button deliveredbtn = (Button)findViewById(R.id.deliveredbtn);
+
+        if(orderdetail.Status == "Picked up") {
+            pickupbtn.setVisibility(View.GONE);
+            deliveredbtn.setVisibility(View.VISIBLE);
+        }
+        else if(orderdetail.Status == "Delivered") {
+            pickupbtn.setVisibility(View.GONE);
+            deliveredbtn.setVisibility(View.GONE);
+        }
+        else {
+            pickupbtn.setVisibility(View.VISIBLE);
+            deliveredbtn.setVisibility(View.GONE);
+        }
     }
 
     @Override
     public void onBackPressed() {
-        if(ispickedup == false)
-            super.onBackPressed();
+        //if(ispickedup == false)
+        super.onBackPressed();
         //dont call **super**, if u want disable back button in current screen.
     }
 
@@ -281,6 +299,17 @@ public class OrderDetailActivity extends Activity implements ConnectionCallbacks
             @Override
             public void onDataChange(DataSnapshot snapshot) {
                 orderdetail = snapshot.getValue(OrderDetails.class);
+                orderdetail.Id = snapshot.getKey();
+                if(orderdetail.Deliveredon != null && orderdetail.Deliveredon != "") {
+                    orderdetail.Status = "Delivered";
+                }
+                else if(orderdetail.Pickedon != null && orderdetail.Pickedon != "") {
+                    orderdetail.Status = "Picked up";
+                }
+                else {
+                    orderdetail.Status = "Yet to pick";
+                }
+
                 setOrderDetails();
             }
 
@@ -294,20 +323,19 @@ public class OrderDetailActivity extends Activity implements ConnectionCallbacks
     private void startTracking(String deviceID) {
         Button pickupbtn = (Button)findViewById(R.id.pickupbtn);
         pickupbtn.setVisibility(View.GONE);
-        Button cancelbtn = (Button)findViewById(R.id.cancelbtn);
-        cancelbtn.setVisibility(View.GONE);
 
         Button deliveredbtn = (Button)findViewById(R.id.deliveredbtn);
         deliveredbtn.setVisibility(View.VISIBLE);
-        RelativeLayout lastupdatelayout = (RelativeLayout)findViewById(R.id.lastupdatelayout);
-        lastupdatelayout.setVisibility(View.VISIBLE);
 
-        ((MyApp)this.getApplication()).startOrderTracking();
+        //RelativeLayout lastupdatelayout = (RelativeLayout)findViewById(R.id.lastupdatelayout);
+        //lastupdatelayout.setVisibility(View.VISIBLE);
+
+        //((MyApp)this.getApplication()).startOrderTracking();
     }
 
     private void stopTracking() {
         //Stop order tracking and start default tracking
-        ((MyApp) this.getApplication()).startDefaultTracking();
+        //((MyApp) this.getApplication()).startDefaultTracking();
     }
 
     private void checkIsPickedup(){

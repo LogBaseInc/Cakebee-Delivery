@@ -30,12 +30,14 @@ public class OrderlistAdapter extends ArrayAdapter<OrderDetails> {
         TextView textView1 = (TextView) rowView.findViewById(R.id.label1);
         TextView textView2 = (TextView) rowView.findViewById(R.id.label2);
         TextView textView3 = (TextView) rowView.findViewById(R.id.label3);
+        TextView textView4 = (TextView) rowView.findViewById(R.id.label4);
 
         OrderDetails orderDetail = values.get(position);
 
         textView1.setText(orderDetail.Id+ " ("+ orderDetail.Time+")");
         textView2.setText(orderDetail.Name);
         textView3.setText(orderDetail.Address);
+        textView4.setText(orderDetail.Status);
 
         return rowView;
     }

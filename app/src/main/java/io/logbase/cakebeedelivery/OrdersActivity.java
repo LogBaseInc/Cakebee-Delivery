@@ -90,7 +90,7 @@ public class OrdersActivity extends ListActivity {
                                 Entry<String, JsonNode> entry = (Entry<String, JsonNode>) nodeIterator.next();
                                 if (entry.getKey() != "LoggedOn" && entry.getKey() != "Loggedat") {
                                     OrderDetails orderdet = mapper.convertValue(entry.getValue(), OrderDetails.class);
-                                    if ((orderdet.Pickedon == null || orderdet.Pickedon == "") && IsOrderValid(orderdet)) {
+                                    if (IsOrderValid(orderdet)) {
                                         if(!(orderdet.Time.contains("Mid"))) {
                                             String[] timesplit = orderdet.Time.split(":");
                                             Boolean ispm = false;
@@ -103,17 +103,18 @@ public class OrdersActivity extends ListActivity {
                                             orderdet.TimeSort = 24;
                                         }
 
+                                        if(orderdet.Deliveredon != null && orderdet.Deliveredon != "") {
+                                            orderdet.Status = "Delivered";
+                                        }
+                                        else if(orderdet.Pickedon != null && orderdet.Pickedon != "") {
+                                            orderdet.Status = "Picked up";
+                                        }
+                                        else {
+                                            orderdet.Status = "Yet to pick";
+                                        }
                                         orderdet.Name = upperCaseFirst(orderdet.Name);
                                         orderdet.Id = entry.getKey();
                                         orderDetaillist.add(orderdet);
-                                    }
-                                    else if((orderdet.Pickedon != null && orderdet.Pickedon != "") && (orderdet.Deliveredon == null || orderdet.Deliveredon == "")) {
-                                        Activity currentActivity = ((MyApp)context.getApplicationContext()).getCurrentActivity();
-                                        if(currentActivity.getClass() == OrdersActivity.class) {
-                                            orderdet.Name = upperCaseFirst(orderdet.Name);
-                                            orderdet.Id = entry.getKey();
-                                            showOrderDetails(orderdet);
-                                        }
                                     }
                                 }
                             }
