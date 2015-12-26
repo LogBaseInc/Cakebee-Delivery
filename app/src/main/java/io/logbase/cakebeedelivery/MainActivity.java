@@ -12,13 +12,11 @@ import android.content.SharedPreferences;
 import android.content.Context;
 import android.widget.EditText;
 import android.widget.Toast;
-
 import com.firebase.client.ChildEventListener;
 import com.firebase.client.Firebase;
 import com.firebase.client.ValueEventListener;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.FirebaseError;
-
 import java.text.SimpleDateFormat;
 import java.util.Set;
 import java.util.HashSet;
@@ -29,11 +27,17 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.widget.TextView;
+import android.widget.Spinner;
+import android.widget.ArrayAdapter;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemSelectedListener;
 
-public class MainActivity extends Activity {
+public class MainActivity extends Activity implements OnItemSelectedListener{
 
     public Context context;
     LBProcessDialog mDialog = null;
+    String alerttype = "Ring tone";
+    SharedPreferences sharedPref;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,16 +45,27 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
         context = this;
         mDialog = new LBProcessDialog(this);
+        sharedPref = getSharedPreferences(getString(R.string.app_name), Context.MODE_PRIVATE);
 
         Firebase.setAndroidContext(this);
+
+        Spinner dropdown = (Spinner)findViewById(R.id.alerttype);
+        String[] items = new String[]{"Ring tone", "Notification"};
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, items);
+        dropdown.setAdapter(adapter);
+        dropdown.setOnItemSelectedListener(this);
 
         Button savebutton = (Button)findViewById(R.id.savebutton);
         savebutton.getBackground().setColorFilter(0xFF00b5ad, PorterDuff.Mode.MULTIPLY);
 
-        SharedPreferences sharedPref = getSharedPreferences(getString(R.string.app_name), Context.MODE_PRIVATE);
         String deviceID = sharedPref.getString("deviceID", null);
         String accountID = sharedPref.getString("accountID", null);
+
+        Spinner alerttypespinner = (Spinner)findViewById(R.id.alerttype);
+
         if(accountID != null && deviceID != null) {
+            alerttypespinner.setVisibility(View.VISIBLE);
+
             String username = sharedPref.getString("username", null);
             String accountname = sharedPref.getString("accountname", null);
 
@@ -67,6 +82,8 @@ public class MainActivity extends Activity {
                 Intent intent = new Intent(this, LoginActivity.class);
                 startActivity(intent);
             }
+        } else {
+            alerttypespinner.setVisibility(View.GONE);
         }
     }
 
@@ -74,6 +91,19 @@ public class MainActivity extends Activity {
     public void onResume() {
         super.onResume();
         ((MyApp) context.getApplicationContext()).setCurrentActivity(this);
+
+        if(sharedPref.getString("alerttype", null) != null)
+            alerttype = sharedPref.getString("alerttype", null);
+        else
+            alerttype = "Ring tone";
+
+        Spinner alerttypespinner = (Spinner)findViewById(R.id.alerttype);
+        if(alerttype.contains("Notification")) {
+            alerttypespinner.setSelection(1);
+        }
+        else {
+            alerttypespinner.setSelection(0);
+        }
     }
 
     @Override
@@ -89,6 +119,15 @@ public class MainActivity extends Activity {
         // as you specify a parent activity in AndroidManifest.xml.
 
         return super.onOptionsItemSelected(item);
+    }
+
+    public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
+        // An item was selected. You can retrieve the selected item using
+        alerttype = (String) parent.getItemAtPosition(pos);
+    }
+
+    public void onNothingSelected(AdapterView<?> parent) {
+        // Another interface callback
     }
 
     public void saveDeviceID(View view) {
@@ -166,12 +205,13 @@ public class MainActivity extends Activity {
         EditText usernameText = (EditText)findViewById(R.id.username);
         String username = usernameText.getText().toString();
 
-        SharedPreferences sharedPref = getSharedPreferences(getString(R.string.app_name), Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPref.edit();
         editor.putString("deviceID", deviceID);
         editor.putString("accountID", accountID);
         editor.putString("accountname", accountname);
         editor.putString("username", username);
+        editor.putString("alerttype", alerttype);
+
         editor.commit();
         OrderAdded(accountID, deviceID);
 
@@ -190,13 +230,11 @@ public class MainActivity extends Activity {
             public void onChildAdded(DataSnapshot snapshot, String previousChildKey) {
                 if (snapshot.getKey().toString().contains("Logged") == false) {
                     ArrayList<String> orderlist;
-                    SharedPreferences sharedPref = getSharedPreferences(getString(R.string.app_name), Context.MODE_PRIVATE);
                     SharedPreferences.Editor editor = sharedPref.edit();
                     Set orders = sharedPref.getStringSet("OrderIds", null);
                     if (orders != null) {
                         orderlist = new ArrayList<String>(orders);
                         if (orderlist.indexOf(snapshot.getKey()) < 0) {
-                            System.out.println("orderlist" + orderlist);
                             orders.add(snapshot.getKey());
                             editor.putStringSet("OrderIds", orders);
                             editor.commit();
@@ -239,6 +277,13 @@ public class MainActivity extends Activity {
     private void NotifyNewOrder(){
         try {
             // define sound URI, the sound to be played when there's a notification
+            String savedalerttype = sharedPref.getString("alerttype", null);
+            int ringtonetype = RingtoneManager.TYPE_RINGTONE;
+
+            if(savedalerttype != null && savedalerttype.contains("Notification")) {
+                ringtonetype = RingtoneManager.TYPE_NOTIFICATION;
+            }
+
             Intent notificationIntent = new Intent(context, OrdersActivity.class);
             notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
                     | Intent.FLAG_ACTIVITY_SINGLE_TOP);
@@ -246,7 +291,7 @@ public class MainActivity extends Activity {
             PendingIntent intent = PendingIntent.getActivity(context, 0,
                     notificationIntent, 0);
 
-            Uri soundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
+            Uri soundUri = RingtoneManager.getDefaultUri(ringtonetype);
             NotificationManager notificationManager = (NotificationManager) context
                     .getSystemService(Context.NOTIFICATION_SERVICE);
             Notification notification = new Notification.Builder(this)

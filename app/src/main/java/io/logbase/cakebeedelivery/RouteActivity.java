@@ -15,6 +15,8 @@ import java.util.ArrayList;
 import org.w3c.dom.Document;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import android.content.Context;
+import android.widget.Toast;
+
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 
 public class RouteActivity extends FragmentActivity {
@@ -25,13 +27,13 @@ public class RouteActivity extends FragmentActivity {
     LatLng fromPosition;
     LatLng toPosition;
     MarkerOptions markerOptions;
-    Context context;
+    LBProcessDialog mDialog= null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_route);
-        context = this;
+        mDialog = new LBProcessDialog(this);
         setUpMapIfNeeded();
     }
 
@@ -76,26 +78,25 @@ public class RouteActivity extends FragmentActivity {
      * This should only be called once and when we are sure that {@link #mMap} is not null.
      */
     private void setUpMap() {
+        Bundle b = getIntent().getExtras();
 
         v2GetRouteDirection = new GMapV2GetRouteDirection();
         mMap.getUiSettings().setZoomControlsEnabled(true);
 
-        mMap.animateCamera(CameraUpdateFactory.zoomTo(10));
+        mMap.animateCamera(CameraUpdateFactory.zoomTo(14));
         markerOptions = new MarkerOptions();
-        fromPosition = new LatLng(11.663837, 78.147297);
-        toPosition = new LatLng(11.723512, 78.466287);
+        fromPosition = new LatLng(b.getDouble("fromlat"), b.getDouble("fromlng"));
+        toPosition = new LatLng(b.getDouble("tolat"), b.getDouble("tolng"));
+        
         GetRouteTask getRoute = new GetRouteTask();
         getRoute.execute();
     }
 
     private class GetRouteTask extends AsyncTask<String, Void, String> {
-        private ProgressDialog Dialog;
         String response = "";
         @Override
         protected void onPreExecute() {
-            //Dialog = new ProgressDialog((MyApp)context.getApplicationContext());
-            //Dialog.setMessage("Loading route...");
-            //Dialog.show();
+            mDialog.StartProcessDialog();
         }
 
         @Override
@@ -108,20 +109,24 @@ public class RouteActivity extends FragmentActivity {
 
         @Override
         protected void onPostExecute(String result) {
-            mMap.clear();
             if(response.equalsIgnoreCase("Success")){
-
                 ArrayList<LatLng> directionPoint = v2GetRouteDirection.getDirection(document);
-                PolylineOptions rectOptions = new PolylineOptions().width(10).color(
-                        Color.RED);
-                int midpoint = (directionPoint.size()/2);
-                for (int i = 0; i < directionPoint.size(); i++) {
-                    rectOptions.add(directionPoint.get(i));
-                }
-                // Get back the mutable Polyline
-                mMap.addPolyline(rectOptions);
+                if(directionPoint.size() > 0) {
+                    PolylineOptions rectOptions = new PolylineOptions().width(10).color(
+                            Color.RED);
+                    int midpoint = (directionPoint.size() / 2);
+                    for (int i = 0; i < directionPoint.size(); i++) {
+                        rectOptions.add(directionPoint.get(i));
+                    }
+                    // Get back the mutable Polyline
+                    mMap.addPolyline(rectOptions);
 
-                mMap.moveCamera(CameraUpdateFactory.newLatLng(directionPoint.get(midpoint)));
+                    mMap.moveCamera(CameraUpdateFactory.newLatLng(directionPoint.get(midpoint)));
+                }
+                else {
+                    mMap.moveCamera(CameraUpdateFactory.newLatLng(toPosition));
+                    showToast("No route found");
+                }
 
                 MarkerOptions tomarker = new MarkerOptions().position(toPosition);
                 tomarker.icon(BitmapDescriptorFactory.fromResource(R.drawable.reddot));
@@ -130,13 +135,24 @@ public class RouteActivity extends FragmentActivity {
                 MarkerOptions frommarker = new MarkerOptions().position(fromPosition);
                 frommarker.icon(BitmapDescriptorFactory.fromResource(R.drawable.greendot));
                 mMap.addMarker(frommarker);
+                mDialog.StopProcessDialog();
+
             }
-            //Dialog.dismiss();
+            else {
+                showToast("Something went wrong, try after sometime");
+            }
+
         }
     }
     @Override
     protected void onStop() {
         super.onStop();
         finish();
+    }
+
+    private void showToast(String message) {
+        mDialog.StopProcessDialog();
+        Toast toast = Toast.makeText(this, message, Toast.LENGTH_SHORT);
+        toast.show();
     }
 }

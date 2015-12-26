@@ -23,6 +23,7 @@ import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListe
 import com.google.android.gms.location.LocationServices;
 
 import java.text.SimpleDateFormat;
+import java.util.HashSet;
 
 /**
  * Created by logbase on 30/11/15.
@@ -102,6 +103,7 @@ public class LoginActivity extends Activity implements ConnectionCallbacks, OnCo
         SharedPreferences sharedPref = getSharedPreferences(getString(R.string.app_name), Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPref.edit();
         editor.putString("loggedinDate", currentDate);
+        editor.putStringSet("OrderIds", null);
         editor.commit();
 
         startDefaultTracking();

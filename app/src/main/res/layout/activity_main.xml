@@ -27,11 +27,24 @@
             android:layout_height="wrap_content"
             android:hint="Enter user name"
             android:layout_marginBottom="36dp"
-            android:layout_above="@+id/savebutton"
+            android:layout_above="@+id/alerttype"
             android:layout_alignParentRight="true"
             android:layout_alignParentEnd="true"
             android:imeOptions="actionDone"
             android:singleLine="true"/>
+
+        <Spinner
+            android:id="@+id/alerttype"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Select alert type"
+            android:layout_marginBottom="36dp"
+            android:layout_above="@+id/savebutton"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:imeOptions="actionDone"
+            android:singleLine="true"
+            android:spinnerMode="dropdown" />
 
         <Button
             android:layout_width="150dp"
@@ -45,5 +58,7 @@
             android:layout_centerVertical="true"
             android:layout_centerHorizontal="true"
             android:textColor="#ffffff"/>
+
+
 
 </RelativeLayout>

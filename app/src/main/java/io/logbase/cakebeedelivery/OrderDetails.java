@@ -33,6 +33,10 @@ public class OrderDetails implements Comparable {
     @JsonIgnoreProperties(ignoreUnknown = true)
     public String Status;
     @JsonIgnoreProperties(ignoreUnknown = true)
+    public double lat;
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public double lng;
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public List<ItemDetails> Items;
 
     @Override
