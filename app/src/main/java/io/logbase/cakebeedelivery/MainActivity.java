@@ -71,9 +71,11 @@ public class MainActivity extends Activity implements OnItemSelectedListener{
 
             EditText usernametext = (EditText)findViewById(R.id.username);
             usernametext.setText(username);
+            usernametext.setEnabled(false);
 
             EditText accountnametext = (EditText)findViewById(R.id.accountname);
             accountnametext.setText(accountname);
+            accountnametext.setEnabled(false);
 
             OrderAdded(accountID, deviceID);
 

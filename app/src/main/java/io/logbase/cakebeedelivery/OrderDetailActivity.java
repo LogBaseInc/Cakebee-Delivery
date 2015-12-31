@@ -78,7 +78,6 @@ public class OrderDetailActivity extends Activity implements ConnectionCallbacks
         setGoogleApiClient();
         initialize();
         gettolatandlng();
-        checkIsPickedup();
     }
 
     @Override
@@ -315,18 +314,22 @@ public class OrderDetailActivity extends Activity implements ConnectionCallbacks
 
         Button pickupbtn = (Button)findViewById(R.id.pickupbtn);
         Button deliveredbtn = (Button)findViewById(R.id.deliveredbtn);
+        Button viewroutebtn = (Button)findViewById(R.id.viewroutegtn);
 
         if(orderdetail.Status == "Picked up") {
             pickupbtn.setVisibility(View.GONE);
             deliveredbtn.setVisibility(View.VISIBLE);
+            viewroutebtn.setVisibility(View.VISIBLE);
         }
         else if(orderdetail.Status == "Delivered") {
             pickupbtn.setVisibility(View.GONE);
             deliveredbtn.setVisibility(View.GONE);
+            viewroutebtn.setVisibility(View.GONE);
         }
         else {
             pickupbtn.setVisibility(View.VISIBLE);
             deliveredbtn.setVisibility(View.GONE);
+            viewroutebtn.setVisibility(View.VISIBLE);
         }
     }
 
@@ -338,7 +341,7 @@ public class OrderDetailActivity extends Activity implements ConnectionCallbacks
     }
 
     private void getOrderDetails() {
-        Firebase myFirebaseRef =  new Firebase(getString(R.string.friebaseurl)+"accounts/"+accountID+"/orders/"+deviceID+"/"+currentDate+"/"+orderdetail.Id);
+        Firebase myFirebaseRef =  new Firebase(getString(R.string.friebaseurl)+"accounts/"+accountID+"/orders/"+deviceID+"/"+currentDate + "/" + orderdetail.Id);
         myFirebaseRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot snapshot) {
@@ -369,30 +372,12 @@ public class OrderDetailActivity extends Activity implements ConnectionCallbacks
         Button deliveredbtn = (Button)findViewById(R.id.deliveredbtn);
         deliveredbtn.setVisibility(View.VISIBLE);
 
-        //((MyApp)this.getApplication()).startOrderTracking();
+        ((MyApp)this.getApplication()).startOrderTracking();
     }
 
     private void stopTracking() {
         //Stop order tracking and start default tracking
-        //((MyApp) this.getApplication()).startDefaultTracking();
-    }
-
-    private void checkIsPickedup(){
-        Firebase myFirebaseRef = new Firebase(getString(R.string.friebaseurl)+"accounts/"+accountID+"/orders/"+deviceID+"/"+currentDate+"/"+orderdetail.Id);
-        myFirebaseRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot snapshot) {
-                OrderDetails order = snapshot.getValue(OrderDetails.class);
-                if(order.Pickedat != null && order.Pickedat != "") {
-                    startTracking(deviceID);
-                }
-            }
-
-            @Override
-            public void onCancelled(FirebaseError firebaseError) {
-                System.out.println("The read failed: " + firebaseError.getMessage());
-            }
-        });
+        ((MyApp) this.getApplication()).startDefaultTracking();
     }
 
     private void gettolatandlng(){

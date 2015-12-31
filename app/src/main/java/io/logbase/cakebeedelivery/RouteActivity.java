@@ -87,7 +87,7 @@ public class RouteActivity extends FragmentActivity {
         markerOptions = new MarkerOptions();
         fromPosition = new LatLng(b.getDouble("fromlat"), b.getDouble("fromlng"));
         toPosition = new LatLng(b.getDouble("tolat"), b.getDouble("tolng"));
-        
+
         GetRouteTask getRoute = new GetRouteTask();
         getRoute.execute();
     }
@@ -127,6 +127,8 @@ public class RouteActivity extends FragmentActivity {
                     mMap.moveCamera(CameraUpdateFactory.newLatLng(toPosition));
                     showToast("No route found");
                 }
+
+                mMap.animateCamera(CameraUpdateFactory.zoomTo(14));
 
                 MarkerOptions tomarker = new MarkerOptions().position(toPosition);
                 tomarker.icon(BitmapDescriptorFactory.fromResource(R.drawable.reddot));
