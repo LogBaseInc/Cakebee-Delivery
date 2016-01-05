@@ -15,7 +15,7 @@ public class OrderDetails implements Comparable {
     @JsonIgnoreProperties(ignoreUnknown = true)
     public String Name;
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public int TimeSort;
+    public Double TimeSort;
     @JsonIgnoreProperties(ignoreUnknown = true)
     public String Time;
     @JsonIgnoreProperties(ignoreUnknown = true)
@@ -41,8 +41,9 @@ public class OrderDetails implements Comparable {
 
     @Override
     public int compareTo(Object another) {
-        return this.TimeSort - ((OrderDetails)another).TimeSort;
+        return this.TimeSort > ((OrderDetails)another).TimeSort ? 1 : -1;
     }
+
 }
 
 

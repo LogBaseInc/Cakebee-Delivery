@@ -91,29 +91,80 @@ public class OrdersActivity extends ListActivity {
                                 if (entry.getKey() != "LoggedOn" && entry.getKey() != "Loggedat") {
                                     OrderDetails orderdet = mapper.convertValue(entry.getValue(), OrderDetails.class);
                                     if (IsOrderValid(orderdet)) {
+                                        String[] timesplit = new String[0];
+                                        boolean ispickupam = true;
+                                        boolean isdeliveryam = true;
+
                                         if(!(orderdet.Time.contains("Mid"))) {
-                                            String[] timesplit = orderdet.Time.split(":");
-                                            Boolean ispm = false;
-                                            if (timesplit[1].toLowerCase().indexOf("pm") >= 0 && Integer.parseInt(timesplit[0]) >= 1 && Integer.parseInt(timesplit[0]) <= 11) {
-                                                ispm = true;
+                                            orderdet.Time = orderdet.Time.toLowerCase();
+                                            if(orderdet.Time.contains(":")) {
+                                                orderdet.Time = orderdet.Time.replaceAll(":", ".");
                                             }
-                                            orderdet.TimeSort = (Double.isNaN(Double.parseDouble(timesplit[0])) ? 24 : (ispm ? (Integer.parseInt(timesplit[0])+12) : Integer.parseInt(timesplit[0])));
+
+                                            timesplit = orderdet.Time.split("-");
+                                            if(timesplit.length >= 2) {
+                                                timesplit[0] = timesplit[0].replaceAll(" ", "");
+                                                timesplit[1] = timesplit[1].replaceAll(" ", "");
+
+                                                Boolean ispm = false;
+                                                isdeliveryam = !(timesplit[1].contains("pm"));
+                                                if(timesplit[0].contains("am")) {
+                                                    ispm = false;
+                                                    ispickupam = true;
+                                                    timesplit[1] = timesplit[1].replaceAll("pm", "");
+                                                    if (Double.parseDouble(timesplit[1]) == 12)
+                                                        isdeliveryam = true;
+                                                }
+                                                else if(timesplit[0].contains("pm")){
+                                                    ispm = true;
+                                                    ispickupam = false;
+                                                    timesplit[1] = timesplit[1].replaceAll("pm", "");
+                                                    timesplit[1] = timesplit[1].replaceAll("pm", "");
+                                                    if (Double.parseDouble(timesplit[1]) == 12)
+                                                        isdeliveryam = true;
+                                                }
+                                                else {
+                                                    if (timesplit[1].indexOf("pm") >= 0 && Double.parseDouble(timesplit[0]) >= 1 && Double.parseDouble(timesplit[0]) <= 11) {
+                                                        timesplit[1] = timesplit[1].replaceAll("pm", "");
+                                                        if (Double.parseDouble(timesplit[1]) != 12) {
+                                                            ispm = true;
+                                                            ispickupam = false;
+                                                        }
+                                                        else {
+                                                            isdeliveryam = true;
+                                                        }
+                                                    }
+                                                }
+
+                                                timesplit[0] = timesplit[0].replaceAll("am", "");
+                                                timesplit[0] = timesplit[0].replaceAll("pm", "");
+
+                                                orderdet.TimeSort = (Double.isNaN(Double.parseDouble(timesplit[0])) ? 24 : (ispm ? (Double.parseDouble(timesplit[0]) + 12) : Double.parseDouble(timesplit[0])));
+                                            }
+                                            else
+                                                orderdet.TimeSort = 0.0;
                                         }
                                         else {
-                                            orderdet.TimeSort = 24;
+                                            orderdet.TimeSort = 24.0;
                                         }
+
+                                        orderdet.Name = upperCaseFirst(orderdet.Name);
+                                        orderdet.Id = entry.getKey();
 
                                         if(orderdet.Deliveredon != null && orderdet.Deliveredon != "") {
                                             orderdet.Status = "Delivered";
+                                            ((MyApp) context.getApplicationContext()).removeOrders(orderdet.Id, false);
                                         }
                                         else if(orderdet.Pickedon != null && orderdet.Pickedon != "") {
                                             orderdet.Status = "Picked up";
+                                            ((MyApp) context.getApplicationContext()).removeOrders(orderdet.Id, true);
+                                            ((MyApp) context.getApplicationContext()).addOrders(orderdet.Id, timesplit[1], isdeliveryam, false);
                                         }
                                         else {
                                             orderdet.Status = "Yet to pick";
+                                            ((MyApp) context.getApplicationContext()).addOrders(orderdet.Id, timesplit[0], ispickupam, true);
+                                            ((MyApp) context.getApplicationContext()).addOrders(orderdet.Id, timesplit[1], isdeliveryam, false);
                                         }
-                                        orderdet.Name = upperCaseFirst(orderdet.Name);
-                                        orderdet.Id = entry.getKey();
                                         orderDetaillist.add(orderdet);
                                     }
                                 }

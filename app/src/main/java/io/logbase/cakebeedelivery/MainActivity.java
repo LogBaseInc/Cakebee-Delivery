@@ -1,6 +1,7 @@
 package io.logbase.cakebeedelivery;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.view.Menu;
@@ -17,7 +18,10 @@ import com.firebase.client.Firebase;
 import com.firebase.client.ValueEventListener;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.FirebaseError;
+
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Iterator;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.ArrayList;
@@ -26,11 +30,14 @@ import android.net.Uri;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.widget.TextView;
+import java.util.Date;
 import android.widget.Spinner;
 import android.widget.ArrayAdapter;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
+import android.app.AlarmManager;
+import java.text.SimpleDateFormat;
+import java.util.Map;
 
 public class MainActivity extends Activity implements OnItemSelectedListener{
 
@@ -87,6 +94,8 @@ public class MainActivity extends Activity implements OnItemSelectedListener{
         } else {
             alerttypespinner.setVisibility(View.GONE);
         }
+
+        registerAlarm(this);
     }
 
     @Override
@@ -277,57 +286,65 @@ public class MainActivity extends Activity implements OnItemSelectedListener{
     }
 
     private void NotifyNewOrder(){
-        try {
-            // define sound URI, the sound to be played when there's a notification
-            String savedalerttype = sharedPref.getString("alerttype", null);
-            int ringtonetype = RingtoneManager.TYPE_RINGTONE;
+        ((MyApp) context.getApplicationContext()).Notify("New order has been assigned");
+    }
 
-            if(savedalerttype != null && savedalerttype.contains("Notification")) {
-                ringtonetype = RingtoneManager.TYPE_NOTIFICATION;
+    public static void registerAlarm(Context context) {
+        AlarmManager alarmManager=(AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        Intent intent = new Intent(context, AlarmReceiver.class);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
+        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP,System.currentTimeMillis(),(60000 * 10), pendingIntent); //10 mins
+    }
+
+    public static class AlarmReceiver extends BroadcastReceiver
+    {
+        @Override
+        public void onReceive(Context context, Intent intent)
+        {
+            System.out.println("onReceive");
+            MyApp app = ((MyApp) context.getApplicationContext());
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd hh:mm a");
+            String notifcationmessage = "";
+
+            Map<String, String> yettopickuporders = app.getOrders(true);
+            Iterator it = yettopickuporders.entrySet().iterator();
+            while (it.hasNext()) {
+                Map.Entry pair = (Map.Entry)it.next();
+                try {
+                    Date date1 = dateFormat.parse((String) pair.getValue());
+                    Date today = new Date();
+
+                    long diffMins = (date1.getTime() - today.getTime()) / 60000;
+                    // Difference less than 10 mins
+                    if (diffMins <= 10) {
+                        notifcationmessage = notifcationmessage + ("Order #" + pair.getKey() + " is due for pickup") + "\n";
+                    }
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
             }
 
-            Intent notificationIntent = new Intent(context, OrdersActivity.class);
-            notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
-                    | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            Map<String, String> yetdeliverorders = app.getOrders(false);
+            it = yetdeliverorders.entrySet().iterator();
+            while (it.hasNext()) {
+                Map.Entry pair = (Map.Entry)it.next();
+                try {
+                    Date date1 = dateFormat.parse((String) pair.getValue());
+                    Date today = new Date();
 
-            PendingIntent intent = PendingIntent.getActivity(context, 0,
-                    notificationIntent, 0);
+                    long diffMins = (date1.getTime() - today.getTime()) / 60000;
+                    // Difference less than 10 mins
+                    if (diffMins <= 10) {
+                        notifcationmessage = notifcationmessage + ("Order #" + pair.getKey() + " is due for delivery") + "\n";
+                    }
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+            }
 
-            Uri soundUri = RingtoneManager.getDefaultUri(ringtonetype);
-            NotificationManager notificationManager = (NotificationManager) context
-                    .getSystemService(Context.NOTIFICATION_SERVICE);
-            Notification notification = new Notification.Builder(this)
-                    .setContentTitle("Delivery")
-                    .setContentText("New order has been assigned")
-                    .setSmallIcon(R.drawable.icon)
-                    .setSound(soundUri)
-                    .setFullScreenIntent(intent, true)
-                    .setVibrate(new long[] {1000, 1000, 1000, 1000, 1000})
-                    .getNotification();
-
-            //notification.setLatestEventInfo(context, "Cakebee", "New order has been assigned", intent);
-            notification.flags |= Notification.FLAG_AUTO_CANCEL;
-            notificationManager.notify(0, notification);
-        }
-        catch (Exception e) {
-            ShowToast(e.getMessage());
-        }
-
-    }
-
-    public class NotificationReceiver extends Activity {
-
-        @Override
-        protected void onCreate(Bundle savedInstanceState) {
-
-            super.onCreate(savedInstanceState);
-            setContentView(R.layout.activity_main);
-
-            TextView tv = new TextView(this);
-            tv.setText("New Order!");
-
-            setContentView(tv);
+            if(notifcationmessage != "") {
+                app.Notify(notifcationmessage);
+            }
         }
     }
-
 }
