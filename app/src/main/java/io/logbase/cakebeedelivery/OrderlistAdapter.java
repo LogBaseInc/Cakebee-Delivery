@@ -34,7 +34,7 @@ public class OrderlistAdapter extends ArrayAdapter<OrderDetails> {
 
         OrderDetails orderDetail = values.get(position);
 
-        textView1.setText(orderDetail.Id+ " ("+ orderDetail.Time+")");
+        textView1.setText("#"+orderDetail.Id+ " ("+ orderDetail.Time+")");
         textView2.setText(orderDetail.Name);
         textView3.setText(orderDetail.Address);
         textView4.setText(orderDetail.Status);

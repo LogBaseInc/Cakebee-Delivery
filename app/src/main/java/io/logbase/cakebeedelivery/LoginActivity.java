@@ -11,6 +11,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
@@ -65,6 +66,10 @@ public class LoginActivity extends Activity implements ConnectionCallbacks, OnCo
 
         deviceID = sharedPref.getString("deviceID", null);
         accountID = sharedPref.getString("accountID", null);
+
+        String accountname = sharedPref.getString("accountname", null);
+        TextView title = (TextView)findViewById(R.id.title);
+        title.setText((accountname.substring(0, 1).toUpperCase() + accountname.substring(1)) + " Deliveries");
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
         currentDate = sdf.format(new java.util.Date());
@@ -127,10 +132,14 @@ public class LoginActivity extends Activity implements ConnectionCallbacks, OnCo
     }
 
     private void isLoggedIn() {
+        mDialog.StartProcessDialog();
+
         Firebase myFirebaseRef =  new Firebase(getString(R.string.friebaseurl)+"accounts/"+accountID+"/orders/"+deviceID+"/"+currentDate+"/LoggedOn");
         myFirebaseRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot snapshot) {
+                mDialog.StopProcessDialog();
+
                 Object obj = snapshot.getValue();
                 if (obj != null && obj != "") {
                     SharedPreferences sharedPref = getSharedPreferences(getString(R.string.app_name), Context.MODE_PRIVATE);

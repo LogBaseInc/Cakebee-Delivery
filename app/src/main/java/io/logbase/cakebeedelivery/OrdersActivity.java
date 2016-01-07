@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.ListView;
 import android.view.View;
@@ -55,14 +56,24 @@ public class OrdersActivity extends ListActivity {
     }
 
     private void getOrders () {
+        mDialog.StartProcessDialog();
+
         SharedPreferences sharedPref = getSharedPreferences(getString(R.string.app_name), Context.MODE_PRIVATE);
         String deviceID = sharedPref.getString("deviceID", null);
         String accountID = sharedPref.getString("accountID", null);
+        String accountname = sharedPref.getString("accountname", null);
+
+        TextView title = (TextView)findViewById(R.id.title);
+        title.setText((accountname.substring(0, 1).toUpperCase() + accountname.substring(1)) + " Deliveries");
 
         Firebase myFirebaseRef = new Firebase(getString(R.string.friebaseurl)+"accounts/"+accountID+"/orders/"+deviceID+"/"+currentDate);
         myFirebaseRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot snapshot) {
+                mDialog.StopProcessDialog();
+                ((MyApp) context.getApplicationContext()).Clear(true);
+                ((MyApp) context.getApplicationContext()).Clear(false);
+
                 orderDetaillist = new ArrayList<OrderDetails>();
                 Object orders = snapshot.getValue();
                 if (orders != null) {

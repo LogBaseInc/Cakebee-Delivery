@@ -2,13 +2,21 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
-    android:paddingBottom="@dimen/activity_vertical_margin"
     android:descendantFocusability="beforeDescendants"
     android:focusableInTouchMode="true"
     tools:context=".LoginActivity">
+
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:gravity="center"
+        android:textSize="20sp"
+        android:textStyle = "bold"
+        android:text="Delivery"
+        android:textColor="#ffffff"
+        android:background="#00b5ad"
+        android:layout_gravity="center_vertical"/>
 
     <Button
         android:layout_width="100dp"

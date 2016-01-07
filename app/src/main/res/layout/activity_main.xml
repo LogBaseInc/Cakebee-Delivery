@@ -1,19 +1,38 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
-    android:paddingBottom="@dimen/activity_vertical_margin"
     android:descendantFocusability="beforeDescendants"
     android:focusableInTouchMode="true"
     tools:context=".MainActivity">
 
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:gravity="center"
+        android:textSize="20sp"
+        android:textStyle = "bold"
+        android:text="Delivery Tracker Config"
+        android:textColor="#ffffff"
+        android:background="#00b5ad"
+        android:layout_gravity="center_vertical"/>
+
+    <LinearLayout
+        android:id="@+id/formlayout"
+        android:layout_below="@+id/title"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:paddingTop="@dimen/activity_vertical_margin"
+        android:paddingBottom="@dimen/activity_vertical_margin">
         <EditText
             android:id="@+id/accountname"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Enter account name"
+            android:layout_marginTop="20dp"
             android:layout_marginBottom="36dp"
             android:layout_alignParentRight="true"
             android:layout_alignParentEnd="true"
@@ -55,10 +74,10 @@
             android:paddingLeft="10dp"
             android:paddingRight="10dp"
             android:textAllCaps="false"
+            android:gravity="center"
+            android:layout_gravity="center"
             android:layout_centerVertical="true"
             android:layout_centerHorizontal="true"
             android:textColor="#ffffff"/>
-
-
-
+        </LinearLayout>
 </RelativeLayout>

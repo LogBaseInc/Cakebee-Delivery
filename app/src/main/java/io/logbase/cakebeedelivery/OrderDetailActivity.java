@@ -58,6 +58,7 @@ public class OrderDetailActivity extends Activity implements ConnectionCallbacks
     double tolng;
     double fromlat;
     double fromlng;
+    String locationtype;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -183,19 +184,56 @@ public class OrderDetailActivity extends Activity implements ConnectionCallbacks
 
     public void viewrouteclicked(View view){
         if(tolat != 0 && tolng != 0) {
-            /*Intent intent = new Intent(this, RouteActivity.class);
-            intent.putExtra("tolat", tolat);
-            intent.putExtra("tolng", tolng);
-            intent.putExtra("fromlat", 11);
-            intent.putExtra("fromlng", 78);
-            startActivity(intent);*/
+            System.out.println(locationtype);
 
-            getlocation(deviceID, currentDate, "route");
+            if (locationtype.toLowerCase().contains("approximate") || locationtype.toLowerCase().contains("geometric_center")) {
+                DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        switch (which) {
+                            case DialogInterface.BUTTON_POSITIVE:
+                                // Yes button clicked
+                                destinationlocationcorrect();
+                                break;
+                            case DialogInterface.BUTTON_NEGATIVE:
+                                // No button clicked
+                                // do nothing
+                                break;
+                        }
+                    }
+                };
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setMessage("Google maps route is approximate, do you want to view the route?")
+                        .setPositiveButton("Yes", dialogClickListener)
+                        .setNegativeButton("No", dialogClickListener).show();
+
+            }
+            else {
+                destinationlocationcorrect();
+            }
         }
         else {
             showToast("Destination location not identified");
         }
     }
+
+    private void destinationlocationcorrect() {
+         /*Intent intent = new Intent(this, RouteActivity.class);
+            intent.putExtra("tolat", tolat);
+            intent.putExtra("tolng", tolng);
+            intent.putExtra("fromlat", 11);
+            intent.putExtra("fromlng", 78);
+            intent.putExtra("orderid", orderdetail.Id);
+            startActivity(intent);*/
+
+        getlocation(deviceID, currentDate, "route");
+    }
+
+    public void changeDeviceId(View view) {
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.putExtra("ChangeDevice","true");
+        startActivity(intent);
+    }
+
 
     @Override
     public void onConnected(Bundle connectionHint) {
@@ -244,6 +282,7 @@ public class OrderDetailActivity extends Activity implements ConnectionCallbacks
                 intent.putExtra("tolng", tolng);
                 intent.putExtra("fromlat", fromlat);
                 intent.putExtra("fromlng", fromlng);
+                intent.putExtra("orderid", orderdetail.Id);
                 startActivity(intent);
             }
         }
@@ -286,7 +325,7 @@ public class OrderDetailActivity extends Activity implements ConnectionCallbacks
     }
 
     private void setOrderDetails() {
-        TextView idlabel = (TextView)findViewById(R.id.idlabel);
+        TextView title = (TextView)findViewById(R.id.title);
         TextView timelabel = (TextView)findViewById(R.id.timelabel);
         TextView namelabel = (TextView)findViewById(R.id.namelabel);
         TextView addresslabel = (TextView)findViewById(R.id.addresslabel);
@@ -294,7 +333,7 @@ public class OrderDetailActivity extends Activity implements ConnectionCallbacks
         TextView amountlabel = (TextView)findViewById(R.id.amountlabel);
         TextView itemdetailslabel = (TextView)findViewById(R.id.itemdetailslabel);
 
-        idlabel.setText(orderdetail.Id);
+        title.setText("Order #" + orderdetail.Id);
         timelabel.setText(orderdetail.Time);
         namelabel.setText(orderdetail.Name);
         addresslabel.setText(orderdetail.Address);
@@ -401,6 +440,7 @@ public class OrderDetailActivity extends Activity implements ConnectionCallbacks
                     JsonNode node = mapper.readTree(orderString);
                     tolat  = node.get("lat") !=null ? node.get("lat").asDouble() : 0;
                     tolng  =  node.get("lng") !=null ? node.get("lng").asDouble() : 0;
+                    locationtype = node.get("locationtype") !=null ? node.get("locationtype").toString() : "";
 
                 } catch (IOException e) {
                     e.printStackTrace();

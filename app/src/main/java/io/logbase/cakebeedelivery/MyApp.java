@@ -127,6 +127,15 @@ public class MyApp extends Application {
             return yettodeliverorders;
     }
 
+    public void Clear(boolean yettopick) {
+        if(yettopick) {
+            yettopickuporders = new HashMap<String, String>();
+        }
+        else {
+            yettodeliverorders = new HashMap<String, String>();
+        }
+    }
+
     public void Notify(String message){
         try {
             // define sound URI, the sound to be played when there's a notification

@@ -301,7 +301,6 @@ public class MainActivity extends Activity implements OnItemSelectedListener{
         @Override
         public void onReceive(Context context, Intent intent)
         {
-            System.out.println("onReceive");
             MyApp app = ((MyApp) context.getApplicationContext());
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd hh:mm a");
             String notifcationmessage = "";

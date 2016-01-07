@@ -2,217 +2,260 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:paddingLeft="10dp">
-
-    <TextView xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/idlabel"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
-        android:paddingTop="10dp"
-        android:textStyle="bold"
-        android:textColor="#00b5ad">
-    </TextView>
+    android:orientation="vertical">
 
     <LinearLayout
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
+        android:id="@+id/titlelayout"
         android:orientation="horizontal"
-        android:paddingTop="10dp">
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.35"
-            android:text="@string/time" />
-
-        <TextView
-            android:id="@+id/timelabel"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.65"
-            android:ems="10"
-            android:textColor="#000000" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:paddingTop="10dp">
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.35"
-            android:text="@string/name" />
-
-        <TextView
-            android:id="@+id/namelabel"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.65"
-            android:ems="10"
-            android:textColor="#000000"/>
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:paddingTop="10dp">
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.35"
-            android:text="@string/address" />
-
-        <TextView
-            android:id="@+id/addresslabel"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.65"
-            android:ems="10"
-            android:textColor="#000000"/>
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:paddingTop="10dp">
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.35"
-            android:text="@string/mobile" />
-
-        <TextView
-            android:id="@+id/phonelabel"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.65"
-            android:ems="10"
-            android:autoLink="phone"
-            android:textColor="#000000"/>
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:paddingTop="10dp">
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:layout_weight="0.35"
-            android:text="@string/amount" />
-
-        <TextView
-            android:id="@+id/amountlabel"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.65"
-            android:ems="10"
-            android:text="Rs 0"
-            android:textColor="#000000"/>
-    </LinearLayout>
-    <TextView xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/itemslabel"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
-        android:paddingTop="10dp"
-        android:textStyle="bold"
-        android:text="Items">
-    </TextView>
-
-    <TextView xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/itemdetailslabel"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
-        android:paddingTop="10dp"
-        android:textColor="#000000">
-    </TextView>
-
-    <LinearLayout
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:paddingTop="20dp"
-        android:gravity="center">
-
-        <Button
-            android:id="@+id/pickupbtn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:ems="5"
-            android:text="@string/pickup"
-            android:textColor="#ffffff"
-            android:onClick="pickupclicked"/>
-
-        <Button
-            android:id="@+id/deliveredbtn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:ems="6"
-            android:text="@string/delivered"
-            android:textColor="#ffffff"
-            android:onClick="delivered"/>
-
-        <Button
-            android:id="@+id/cancelbtn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:ems="5"
-            android:text="@string/goback"
-            android:textColor="#ffffff"
-            android:onClick="cancelclicked"/>
-
-        <Button
-            android:id="@+id/viewroutegtn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:ems="7"
-            android:text="@string/viewroute"
-            android:textColor="#ffffff"
-            android:onClick="viewrouteclicked"/>
-    </LinearLayout>
-
-    <RelativeLayout
-        android:id="@+id/lastupdatelayout"
+        xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:paddingRight="10dp"
-        android:paddingBottom="10dp">
+        android:layout_height="50dp"
+        android:background="#00b5ad"
+        android:baselineAligned="false">
         <TextView
-            android:layout_width="wrap_content"
+            android:id="@+id/title"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="@string/lastupdatesentat"
-            android:id="@+id/msg"
-            android:layout_above="@+id/clock"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentEnd="true"
-            android:layout_marginTop="20dp"/>
+            android:layout_weight="0.7"
+            android:gravity="center"
+            android:textSize="20sp"
+            android:textStyle = "bold"
+            android:text="Deliveries"
+            android:textColor="#ffffff"
+            android:layout_gravity="center_vertical"/>
 
-        <TextView
-            android:layout_width="wrap_content"
+        <Button
+            android:id="@+id/deviceidlabel"
+            android:layout_below="@+id/title"
+            android:onClick="changeDeviceId"
+            android:gravity="right"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:background="@drawable/settings"
+            android:layout_gravity="center_vertical" />
+    </LinearLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <LinearLayout
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:text="NA"
-            android:id="@+id/clock"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentEnd="true"/>
-    </RelativeLayout>
+            android:orientation="vertical"
+            android:paddingLeft="10dp">
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingTop="10dp">
 
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.35"
+                    android:textSize="18sp"
+                    android:text="@string/time" />
 
+                <TextView
+                    android:id="@+id/timelabel"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.65"
+                    android:ems="10"
+                    android:textSize="18sp"
+                    android:textColor="#000000" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingTop="10dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.35"
+                    android:text="@string/name"
+                    android:textSize="18sp"/>
+
+                <TextView
+                    android:id="@+id/namelabel"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.65"
+                    android:ems="10"
+                    android:textSize="18sp"
+                    android:textColor="#000000"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingTop="10dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.35"
+                    android:textSize="18sp"
+                    android:text="@string/address" />
+
+                <TextView
+                    android:id="@+id/addresslabel"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.65"
+                    android:ems="10"
+                    android:textSize="18sp"
+                    android:textColor="#000000"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingTop="10dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.35"
+                    android:text="@string/mobile"
+                    android:textSize="18sp"/>
+
+                <TextView
+                    android:id="@+id/phonelabel"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.65"
+                    android:ems="10"
+                    android:autoLink="phone"
+                    android:textColor="#000000"
+                    android:textSize="18sp"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingTop="10dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_weight="0.35"
+                    android:text="@string/amount"
+                    android:textSize="18sp"/>
+
+                <TextView
+                    android:id="@+id/amountlabel"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.65"
+                    android:ems="10"
+                    android:text="Rs 0"
+                    android:textColor="#000000"
+                    android:textSize="18sp"/>
+            </LinearLayout>
+            <TextView xmlns:android="http://schemas.android.com/apk/res/android"
+                android:id="@+id/itemslabel"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"
+                android:paddingTop="10dp"
+                android:textStyle="bold"
+                android:text="Items"
+                android:textSize="18sp">
+            </TextView>
+
+            <TextView xmlns:android="http://schemas.android.com/apk/res/android"
+                android:id="@+id/itemdetailslabel"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"
+                android:paddingTop="10dp"
+                android:textColor="#000000"
+                android:textSize="18sp">
+            </TextView>
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingTop="10dp"
+                android:gravity="center">
+
+                <Button
+                    android:id="@+id/pickupbtn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ems="5"
+                    android:text="@string/pickup"
+                    android:textColor="#ffffff"
+                    android:onClick="pickupclicked"/>
+
+                <Button
+                    android:id="@+id/deliveredbtn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ems="6"
+                    android:text="@string/delivered"
+                    android:textColor="#ffffff"
+                    android:onClick="delivered"/>
+
+                <Button
+                    android:id="@+id/cancelbtn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ems="5"
+                    android:text="@string/goback"
+                    android:textColor="#ffffff"
+                    android:onClick="cancelclicked"/>
+
+                <Button
+                    android:id="@+id/viewroutegtn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ems="7"
+                    android:text="@string/viewroute"
+                    android:textColor="#ffffff"
+                    android:onClick="viewrouteclicked"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/lastupdatelayout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="right"
+                android:orientation="vertical"
+                android:paddingTop="10dp"
+                android:paddingRight="10dp"
+                android:paddingBottom="10dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/lastupdatesentat"
+                    android:id="@+id/msg"
+                    android:textSize="18sp"
+                    android:layout_above="@+id/clock"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignParentEnd="true"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="NA"
+                    android:textSize="18sp"
+                    android:id="@+id/clock"
+                    android:layout_alignParentBottom="true"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignParentEnd="true"/>
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
 </LinearLayout>

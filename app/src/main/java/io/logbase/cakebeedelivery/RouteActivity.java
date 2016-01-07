@@ -1,5 +1,6 @@
 package io.logbase.cakebeedelivery;
 
+import android.content.Intent;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 
@@ -15,6 +16,8 @@ import java.util.ArrayList;
 import org.w3c.dom.Document;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import android.content.Context;
+import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
@@ -34,7 +37,19 @@ public class RouteActivity extends FragmentActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_route);
         mDialog = new LBProcessDialog(this);
+
+        Bundle b = getIntent().getExtras();
+        String id = b.getString("orderid");
+        TextView title = (TextView)findViewById(R.id.title);
+        title.setText("Order #" +id);
+
         setUpMapIfNeeded();
+    }
+
+    public void changeDeviceId(View view) {
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.putExtra("ChangeDevice", "true");
+        startActivity(intent);
     }
 
     @Override
@@ -143,7 +158,6 @@ public class RouteActivity extends FragmentActivity {
             else {
                 showToast("Something went wrong, try after sometime");
             }
-
         }
     }
     @Override

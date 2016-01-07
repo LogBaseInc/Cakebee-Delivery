@@ -3,23 +3,42 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent">
+    <LinearLayout
+        android:id="@+id/titlelayout"
+        android:orientation="horizontal"
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="#00b5ad"
+        android:baselineAligned="false">
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.7"
+            android:gravity="center"
+            android:textSize="20sp"
+            android:textStyle = "bold"
+            android:text="Deliveries"
+            android:textColor="#ffffff"
+            android:layout_gravity="center_vertical"/>
 
-    <Button
-        android:id="@+id/deviceidlabel"
-        android:onClick="changeDeviceId"
-        android:gravity="right"
-        android:layout_width="35dp"
-        android:layout_height="35dp"
-        android:layout_alignParentRight="true"
-        android:layout_marginTop="5dp"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
-        android:background="@drawable/settings"/>
+        <Button
+            android:id="@+id/deviceidlabel"
+            android:layout_below="@+id/title"
+            android:onClick="changeDeviceId"
+            android:gravity="right"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:background="@drawable/settings"
+            android:layout_gravity="center_vertical" />
+    </LinearLayout>
 
     <ListView android:id="@id/android:list"
         android:layout_height="fill_parent"
         android:layout_width="fill_parent"
-        android:layout_below="@id/deviceidlabel"/>
+        android:layout_below="@+id/titlelayout"
+        android:layout_marginTop="10dp" />
 
     <TextView
         android:id="@+id/nolist"
