@@ -26,18 +26,22 @@ import android.app.Activity;
 import java.util.Map;
 import java.util.HashMap;
 import android.support.v7.app.NotificationCompat;
+import java.util.TimerTask;
+import java.util.Timer;
 
 public class MyApp extends Application {
 
     private StickMobile stick;
-    private Integer frequency;
     private Map<String, String>  yettodeliverorders= new HashMap<String, String>();
     private Map<String, String>  yettopickuporders= new HashMap<String, String>();
+    String deviceID = "";
+    Integer updatefreq = 0;
+    Context context;
 
     private void startTracking(Integer frequency) {
         SharedPreferences sharedPref = getSharedPreferences(getString(R.string.app_name), Context.MODE_PRIVATE);
-        String deviceID = sharedPref.getString("deviceID", null);
-        boolean stickStarted;
+        deviceID = sharedPref.getString("deviceID", null);
+        context = this;
 
         if(stick == null) {
             IntentFilter mStatusIntentFilter = new IntentFilter("STICK_MOBILE_BROADCAST");
@@ -49,22 +53,29 @@ public class MyApp extends Application {
                     mStatusIntentFilter);
 
             stick = new StickMobile(this, deviceID, frequency, null);
-            stickStarted = stick.start();
+            boolean stickStarted = stick.start();
+            if (!stickStarted)
+                ShowToast("Unable to start if blank device ID, no Network or GPS");
         }
-        else if(stick.isRunning() && this.frequency != frequency) {
+        else if(stick.isRunning() && updatefreq != frequency) {
+            updatefreq = frequency;
             stick.stop();
-
-            stick = new StickMobile(this, deviceID, frequency, null);
-            stickStarted = stick.start();
+            new Timer().schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    stick = new StickMobile(context, deviceID, updatefreq, null);
+                    stick.start();
+                }
+            }, 30000);
         }
-        else {
-            stickStarted = stick.start();
+        else if(stick.isRunning() == false) {
+            stick = new StickMobile(context, deviceID, frequency, null);
+            boolean stickStarted = stick.start();
+            if (!stickStarted)
+                ShowToast("Unable to start if blank device ID, no Network or GPS");
         }
 
-        if (!stickStarted)
-            ShowToast("Unable to start if blank device ID, no Network or GPS");
-
-        this.frequency = frequency;
+        updatefreq = frequency;
     }
 
     public void stopTracking() {
@@ -136,6 +147,17 @@ public class MyApp extends Application {
         }
     }
 
+    /*public void ChangePickedupCount(boolean increase) {
+        if(increase)
+            numberofpickuporders = numberofpickuporders+1;
+        else
+            numberofpickuporders = numberofpickuporders-1;
+    }
+
+    public void ClearPickedupCount() {
+        numberofpickuporders = 0;
+    }*/
+
     public void Notify(String message){
         try {
             // define sound URI, the sound to be played when there's a notification
@@ -183,7 +205,7 @@ public class MyApp extends Application {
     }
 
     private void ShowToast(String message) {
-        Toast toast = Toast.makeText(this, message, Toast.LENGTH_SHORT);
+        Toast toast = Toast.makeText(context, message, Toast.LENGTH_SHORT);
         toast.show();
     }
 

@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.ListView;
@@ -81,6 +82,7 @@ public class OrdersActivity extends ListActivity {
                     listview.setVisibility(View.VISIBLE);
                     TextView nolist = (TextView) findViewById(R.id.nolist);
                     nolist.setVisibility(View.GONE);
+                    int pickedupordercount = 0;
 
                     String ordersString = orders.toString();
 
@@ -168,6 +170,8 @@ public class OrdersActivity extends ListActivity {
                                         }
                                         else if(orderdet.Pickedon != null && orderdet.Pickedon != "") {
                                             orderdet.Status = "Picked up";
+                                            pickedupordercount = pickedupordercount + 1;
+
                                             ((MyApp) context.getApplicationContext()).removeOrders(orderdet.Id, true);
                                             ((MyApp) context.getApplicationContext()).addOrders(orderdet.Id, timesplit[1], isdeliveryam, false);
                                         }
@@ -179,6 +183,12 @@ public class OrdersActivity extends ListActivity {
                                         orderDetaillist.add(orderdet);
                                     }
                                 }
+                            }
+                            if(pickedupordercount > 0) {
+                                startOrderTracking();
+                            }
+                            else {
+                                startDefaultTracking();
                             }
 
                             Collections.sort(orderDetaillist);
@@ -212,6 +222,13 @@ public class OrdersActivity extends ListActivity {
         });
     }
 
+    private void startOrderTracking() {
+        ((MyApp)this.getApplication()).startOrderTracking();
+    }
+
+    private void startDefaultTracking() {
+        ((MyApp)this.getApplication()).startDefaultTracking();
+    }
     private boolean IsOrderValid(OrderDetails orderdet) {
         boolean valid =false;
         if(orderdet.Name != null && orderdet.Name != "" &&

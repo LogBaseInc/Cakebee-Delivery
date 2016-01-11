@@ -171,8 +171,6 @@ public class OrderDetailActivity extends Activity implements ConnectionCallbacks
 
         getlocation(deviceID, currentDate, "Deliveredat");
 
-        stopTracking();
-
         ispickedup = false;
         cancelclicked(null);
     }
@@ -410,13 +408,6 @@ public class OrderDetailActivity extends Activity implements ConnectionCallbacks
 
         Button deliveredbtn = (Button)findViewById(R.id.deliveredbtn);
         deliveredbtn.setVisibility(View.VISIBLE);
-
-        ((MyApp)this.getApplication()).startOrderTracking();
-    }
-
-    private void stopTracking() {
-        //Stop order tracking and start default tracking
-        ((MyApp) this.getApplication()).startDefaultTracking();
     }
 
     private void gettolatandlng(){
