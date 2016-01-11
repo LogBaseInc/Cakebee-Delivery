@@ -117,7 +117,7 @@ public class LoginActivity extends Activity implements ConnectionCallbacks, OnCo
     }
 
     public void stopTracking() {
-        ((MyApp)context.getApplicationContext()).stopTracking();
+        //((MyApp)context.getApplicationContext()).stopTracking();
     }
 
     public void startDefaultTracking() {

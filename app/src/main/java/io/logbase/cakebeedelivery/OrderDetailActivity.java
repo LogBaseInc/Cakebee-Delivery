@@ -59,6 +59,7 @@ public class OrderDetailActivity extends Activity implements ConnectionCallbacks
     double fromlat;
     double fromlng;
     String locationtype;
+    SharedPreferences sharedPref;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,7 +69,7 @@ public class OrderDetailActivity extends Activity implements ConnectionCallbacks
         OrderDetailActivity.myActivity = this;
         mDialog = new LBProcessDialog(this);
 
-        SharedPreferences sharedPref = getSharedPreferences(getString(R.string.app_name), Context.MODE_PRIVATE);
+        sharedPref = getSharedPreferences(getString(R.string.app_name), Context.MODE_PRIVATE);
         deviceID = sharedPref.getString("deviceID", null);
         accountID = sharedPref.getString("accountID", null);
 
@@ -317,6 +318,10 @@ public class OrderDetailActivity extends Activity implements ConnectionCallbacks
         Button deliveredbtn = (Button)findViewById(R.id.deliveredbtn);
         deliveredbtn.setVisibility(View.GONE);
         deliveredbtn.getBackground().setColorFilter(0xFF00b5ad, PorterDuff.Mode.MULTIPLY);
+
+        String lastupdate = sharedPref.getString("lastupdate", null);
+        TextView textView = (TextView)findViewById(R.id.clock);
+        textView.setText(lastupdate);
 
         getOrderDetails();
 

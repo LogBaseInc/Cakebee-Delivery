@@ -37,12 +37,12 @@ public class MyApp extends Application {
     String deviceID = "";
     Integer updatefreq = 0;
     Context context;
+    boolean isstopinprogress = false;
 
     private void startTracking(Integer frequency) {
         SharedPreferences sharedPref = getSharedPreferences(getString(R.string.app_name), Context.MODE_PRIVATE);
         deviceID = sharedPref.getString("deviceID", null);
         context = this;
-
         if(stick == null) {
             IntentFilter mStatusIntentFilter = new IntentFilter("STICK_MOBILE_BROADCAST");
             // Instantiates a new DownloadStateReceiver
@@ -58,6 +58,7 @@ public class MyApp extends Application {
                 ShowToast("Unable to start if blank device ID, no Network or GPS");
         }
         else if(stick.isRunning() && updatefreq != frequency) {
+            isstopinprogress = true;
             updatefreq = frequency;
             stick.stop();
             new Timer().schedule(new TimerTask() {
@@ -65,10 +66,11 @@ public class MyApp extends Application {
                 public void run() {
                     stick = new StickMobile(context, deviceID, updatefreq, null);
                     stick.start();
+                    isstopinprogress = false;
                 }
             }, 30000);
         }
-        else if(stick.isRunning() == false) {
+        else if(stick.isRunning() == false && isstopinprogress == false) {
             stick = new StickMobile(context, deviceID, frequency, null);
             boolean stickStarted = stick.start();
             if (!stickStarted)
@@ -147,17 +149,6 @@ public class MyApp extends Application {
         }
     }
 
-    /*public void ChangePickedupCount(boolean increase) {
-        if(increase)
-            numberofpickuporders = numberofpickuporders+1;
-        else
-            numberofpickuporders = numberofpickuporders-1;
-    }
-
-    public void ClearPickedupCount() {
-        numberofpickuporders = 0;
-    }*/
-
     public void Notify(String message){
         try {
             // define sound URI, the sound to be played when there's a notification
@@ -227,10 +218,15 @@ public class MyApp extends Application {
                 ShowToast("Unable to run service, check if GPS and Network is connected");
             }
             else {
+                Calendar cal = Calendar.getInstance();
+                String date = android.text.format.DateFormat.format("MMM dd, yyyy hh:mm:ss a", cal.getTime()).toString();
+                SharedPreferences sharedPref = getSharedPreferences(getString(R.string.app_name), Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor = sharedPref.edit();
+                editor.putString("lastupdate", date);
+                editor.commit();
+
                 //Received data that was sent to server
                 if(OrderDetailActivity.myActivity != null) {
-                    Calendar cal = Calendar.getInstance();
-                    String date = android.text.format.DateFormat.format("MMM dd, yyyy hh:mm:ss a", cal.getTime()).toString();
                     TextView clock = (TextView) OrderDetailActivity.myActivity.findViewById(R.id.clock);
                     clock.setText(date);
                 }
