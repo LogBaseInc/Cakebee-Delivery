@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Delivery</string>
+    <string name="app_name">Stick Delivery</string>
 
     <string name="action_settings">Settings</string>
     <string name="friebaseurl">https://logbasedev.firebaseio.com/</string>
