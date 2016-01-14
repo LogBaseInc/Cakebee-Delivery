@@ -124,6 +124,7 @@ public class OrdersActivity extends ListActivity {
                                                 if(timesplit[0].contains("am")) {
                                                     ispm = false;
                                                     ispickupam = true;
+                                                    timesplit[1] = timesplit[1].replaceAll("am", "");
                                                     timesplit[1] = timesplit[1].replaceAll("pm", "");
                                                     if (Double.parseDouble(timesplit[1]) == 12)
                                                         isdeliveryam = true;
@@ -131,13 +132,14 @@ public class OrdersActivity extends ListActivity {
                                                 else if(timesplit[0].contains("pm")){
                                                     ispm = true;
                                                     ispickupam = false;
-                                                    timesplit[1] = timesplit[1].replaceAll("pm", "");
+                                                    timesplit[1] = timesplit[1].replaceAll("am", "");
                                                     timesplit[1] = timesplit[1].replaceAll("pm", "");
                                                     if (Double.parseDouble(timesplit[1]) == 12)
                                                         isdeliveryam = true;
                                                 }
                                                 else {
                                                     if (timesplit[1].indexOf("pm") >= 0 && Double.parseDouble(timesplit[0]) >= 1 && Double.parseDouble(timesplit[0]) <= 11) {
+                                                        timesplit[1] = timesplit[1].replaceAll("am", "");
                                                         timesplit[1] = timesplit[1].replaceAll("pm", "");
                                                         if (Double.parseDouble(timesplit[1]) != 12) {
                                                             ispm = true;
