@@ -7,6 +7,7 @@ import java.util.List;
 /**
  * Created by logbase on 20/11/15.
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class OrderDetails implements Comparable {
     @JsonIgnoreProperties(ignoreUnknown = true)
     public String Id;

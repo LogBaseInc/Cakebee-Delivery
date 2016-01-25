@@ -18,7 +18,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 import android.widget.Toast;
-
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import android.widget.TextView;
@@ -26,8 +25,15 @@ import android.app.Activity;
 import java.util.Map;
 import java.util.HashMap;
 import android.support.v7.app.NotificationCompat;
+import com.inrista.loggliest.Loggly;
 import java.util.TimerTask;
 import java.util.Timer;
+import android.location.LocationManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import java.net.URL;
+import java.net.HttpURLConnection;
+import java.io.IOException;
 
 public class MyApp extends Application {
 
@@ -38,52 +44,23 @@ public class MyApp extends Application {
     Integer updatefreq = 0;
     Context context;
     boolean isstopinprogress = false;
+    Loggly loggly;
 
-    private void startTracking(Integer frequency) {
-        SharedPreferences sharedPref = getSharedPreferences(getString(R.string.app_name), Context.MODE_PRIVATE);
-        deviceID = sharedPref.getString("deviceID", null);
-        context = this;
-        if(stick == null) {
-            IntentFilter mStatusIntentFilter = new IntentFilter("STICK_MOBILE_BROADCAST");
-            // Instantiates a new DownloadStateReceiver
-            StatusReceiver mStatusReceiver = new StatusReceiver();
-            // Registers the DownloadStateReceiver and its intent filters
-            LocalBroadcastManager.getInstance(this).registerReceiver(
-                    mStatusReceiver,
-                    mStatusIntentFilter);
+    public void AddTrackingLog(String log) {
+        InitializeLoggly();
+        Loggly.i(deviceID + "_Tracking", log);
+        System.out.println(log);
+    }
 
-            stick = new StickMobile(this, deviceID, frequency, null);
-            boolean stickStarted = stick.start();
-            if (!stickStarted)
-                ShowToast("Unable to start if blank device ID, no Network or GPS");
-        }
-        else if(stick.isRunning() && updatefreq != frequency) {
-            isstopinprogress = true;
-            updatefreq = frequency;
-            stick.stop();
-            new Timer().schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    stick = new StickMobile(context, deviceID, updatefreq, null);
-                    stick.start();
-                    isstopinprogress = false;
-                }
-            }, 30000);
-        }
-        else if(stick.isRunning() == false && isstopinprogress == false) {
-            stick = new StickMobile(context, deviceID, frequency, null);
-            boolean stickStarted = stick.start();
-            if (!stickStarted)
-                ShowToast("Unable to start if blank device ID, no Network or GPS");
-        }
-
-        updatefreq = frequency;
+    public void AddLoginLog(String log) {
+        InitializeLoggly();
+        Loggly.i(deviceID+"_Tracking", log);
     }
 
     public void stopTracking() {
-        if(stick != null) {
+        /*if(stick != null) {
             stick.stop();
-        }
+        }*/
     }
 
     public void startDefaultTracking(){
@@ -195,6 +172,59 @@ public class MyApp extends Application {
         }
     }
 
+    private void startTracking(Integer frequency) {
+        SharedPreferences sharedPref = getSharedPreferences(getString(R.string.app_name), Context.MODE_PRIVATE);
+        deviceID = sharedPref.getString("deviceID", null);
+        context = this;
+        if(stick == null) {
+            IntentFilter mStatusIntentFilter = new IntentFilter("STICK_MOBILE_BROADCAST");
+            // Instantiates a new DownloadStateReceiver
+            StatusReceiver mStatusReceiver = new StatusReceiver();
+            // Registers the DownloadStateReceiver and its intent filters
+            LocalBroadcastManager.getInstance(this).registerReceiver(
+                    mStatusReceiver,
+                    mStatusIntentFilter);
+
+            stick = new StickMobile(this, deviceID, frequency, null);
+            boolean stickStarted = stick.start();
+            if (!stickStarted) {
+                ShowToast("Unable to start if blank device ID, no Network or GPS");
+                AddTrackingLog("Tracking not started. Internet Available: " + isInternetAvailable() +" .GPS Enabled: " + isGPSEnabled());
+            }
+        }
+        else if(stick.isRunning() && updatefreq != frequency) {
+            isstopinprogress = true;
+            updatefreq = frequency;
+            stick.stop();
+            new Timer().schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    stick = new StickMobile(context, deviceID, updatefreq, null);
+                    stick.start();
+                    isstopinprogress = false;
+                }
+            }, 30000);
+        }
+        else if(stick.isRunning() == false && isstopinprogress == false) {
+            stick = new StickMobile(context, deviceID, frequency, null);
+            boolean stickStarted = stick.start();
+            if (!stickStarted) {
+                ShowToast("Unable to start if blank device ID, no Network or GPS");
+                AddTrackingLog("Tracking not started. Internet Available: " + isInternetAvailable() +" .GPS Enabled: " + isGPSEnabled());
+            }
+        }
+
+        updatefreq = frequency;
+    }
+
+    private void InitializeLoggly() {
+        if(loggly == null) {
+            loggly = Loggly.with(this, getString(R.string.logglytoken)).init();
+            SharedPreferences sharedPref = getSharedPreferences(getString(R.string.app_name), Context.MODE_PRIVATE);
+            deviceID = sharedPref.getString("deviceID", null);
+        }
+    }
+
     private void ShowToast(String message) {
         Toast toast = Toast.makeText(context, message, Toast.LENGTH_SHORT);
         toast.show();
@@ -208,6 +238,19 @@ public class MyApp extends Application {
         this.mCurrentActivity = mCurrentActivity;
     }
 
+    public  boolean isInternetAvailable() {
+        ConnectivityManager cm = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
+        return cm.getActiveNetworkInfo() != null;
+    }
+
+    public boolean isGPSEnabled() {
+        LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+        if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER))
+            return true;
+        else
+            return false;
+    }
+
     public class StatusReceiver extends BroadcastReceiver {
         private static final String LOG_TAG = "StickStatusReceiver";
         // Called when the BroadcastReceiver gets an Intent it's registered to receive
@@ -215,11 +258,15 @@ public class MyApp extends Application {
             String status = intent.getExtras().getString("SERVICE_STATUS");
             Log.i(LOG_TAG, "Received status: " + status);
             if((status != null)&&(status.equals("STOP"))) {
+                AddTrackingLog("Tracking stopped. Internet Available: " + isInternetAvailable() +" .GPS Enabled: " + isGPSEnabled());
                 ShowToast("Unable to run service, check if GPS and Network is connected");
             }
             else {
                 Calendar cal = Calendar.getInstance();
                 String date = android.text.format.DateFormat.format("MMM dd, yyyy hh:mm:ss a", cal.getTime()).toString();
+
+                AddTrackingLog(date);
+
                 SharedPreferences sharedPref = getSharedPreferences(getString(R.string.app_name), Context.MODE_PRIVATE);
                 SharedPreferences.Editor editor = sharedPref.edit();
                 editor.putString("lastupdate", date);

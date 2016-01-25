@@ -9,8 +9,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.ListView;
 import android.view.View;
@@ -28,7 +26,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ArrayList;
 import java.text.SimpleDateFormat;
-import android.app.Activity;
 import java.util.Collections;
 
 public class OrdersActivity extends ListActivity {
@@ -138,7 +135,7 @@ public class OrdersActivity extends ListActivity {
                                                         isdeliveryam = true;
                                                 }
                                                 else {
-                                                    if (timesplit[1].indexOf("pm") >= 0 && Double.parseDouble(timesplit[0]) >= 1 && Double.parseDouble(timesplit[0]) <= 11) {
+                                                    if (timesplit[1].indexOf("pm") >= 0 && Double.parseDouble(timesplit[0]) >= 1 && Double.parseDouble(timesplit[0]) < 12) {
                                                         timesplit[1] = timesplit[1].replaceAll("am", "");
                                                         timesplit[1] = timesplit[1].replaceAll("pm", "");
                                                         if (Double.parseDouble(timesplit[1]) != 12) {
@@ -175,12 +172,17 @@ public class OrdersActivity extends ListActivity {
                                             pickedupordercount = pickedupordercount + 1;
 
                                             ((MyApp) context.getApplicationContext()).removeOrders(orderdet.Id, true);
-                                            ((MyApp) context.getApplicationContext()).addOrders(orderdet.Id, timesplit[1], isdeliveryam, false);
+                                            if(timesplit.length >= 1)
+                                                ((MyApp) context.getApplicationContext()).addOrders(orderdet.Id, timesplit[1], isdeliveryam, false);
                                         }
                                         else {
                                             orderdet.Status = "Yet to pick";
-                                            ((MyApp) context.getApplicationContext()).addOrders(orderdet.Id, timesplit[0], ispickupam, true);
-                                            ((MyApp) context.getApplicationContext()).addOrders(orderdet.Id, timesplit[1], isdeliveryam, false);
+
+                                            if(timesplit.length >= 1)
+                                                ((MyApp) context.getApplicationContext()).addOrders(orderdet.Id, timesplit[0], ispickupam, true);
+
+                                            if(timesplit.length >= 2)
+                                                ((MyApp) context.getApplicationContext()).addOrders(orderdet.Id, timesplit[1], isdeliveryam, false);
                                         }
                                         orderDetaillist.add(orderdet);
                                     }

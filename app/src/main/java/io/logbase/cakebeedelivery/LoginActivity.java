@@ -38,20 +38,21 @@ public class LoginActivity extends Activity implements ConnectionCallbacks, OnCo
     String currentDate;
     GoogleApiClient mGoogleApiClient;
     LBProcessDialog mDialog = null;
+    MyApp myapp;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.login);
         context = this;
-
         mDialog = new LBProcessDialog(this);
+        myapp = ((MyApp)context.getApplicationContext());
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        ((MyApp)context.getApplicationContext()).setCurrentActivity(this);
+        myapp.setCurrentActivity(this);
 
         Firebase.setAndroidContext(this);
 
@@ -102,6 +103,8 @@ public class LoginActivity extends Activity implements ConnectionCallbacks, OnCo
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
         String currentdateandtime = sdf.format(new java.util.Date());
 
+        myapp.AddLoginLog(currentdateandtime);
+
         Firebase myFirebaseRef = new Firebase(getString(R.string.friebaseurl)+"accounts/"+accountID+"/orders/"+deviceID+"/"+currentDate+"/LoggedOn");
         myFirebaseRef.setValue(currentdateandtime);
 
@@ -121,7 +124,7 @@ public class LoginActivity extends Activity implements ConnectionCallbacks, OnCo
     }
 
     public void startDefaultTracking() {
-        ((MyApp)context.getApplicationContext()).startDefaultTracking();
+        myapp.startDefaultTracking();
     }
 
     private void GoToOrders() {
