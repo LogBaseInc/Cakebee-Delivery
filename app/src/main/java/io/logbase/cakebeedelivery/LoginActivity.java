@@ -57,13 +57,6 @@ public class LoginActivity extends Activity implements ConnectionCallbacks, OnCo
         Firebase.setAndroidContext(this);
 
         SharedPreferences sharedPref = getSharedPreferences(getString(R.string.app_name), Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPref.edit();
-        editor.putString("TrackDefault", "true");
-        editor.putInt("TrackDefaultFreq", 30);
-        editor.putInt("TrackOrderFreq", 10);
-        editor.commit();
-
-        getConfig();
 
         deviceID = sharedPref.getString("deviceID", null);
         accountID = sharedPref.getString("accountID", null);
@@ -209,27 +202,5 @@ public class LoginActivity extends Activity implements ConnectionCallbacks, OnCo
         }
 
         GoToOrders();
-    }
-
-    private void getConfig() {
-        Firebase myFirebaseRef = new Firebase(getString(R.string.friebaseurl) + "Config");
-        myFirebaseRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot snapshot) {
-                Config config = snapshot.getValue(Config.class);
-
-                SharedPreferences sharedPref = getSharedPreferences(getString(R.string.app_name), Context.MODE_PRIVATE);
-                SharedPreferences.Editor editor = sharedPref.edit();
-                editor.putString("TrackDefault", config.TrackDefault);
-                editor.putInt("TrackDefaultFreq", config.TrackDefaultFreq);
-                editor.putInt("TrackOrderFreq", config.TrackOrderFreq);
-                editor.commit();
-            }
-
-            @Override
-            public void onCancelled(FirebaseError firebaseError) {
-                System.out.println("The read failed: " + firebaseError.getMessage());
-            }
-        });
     }
 }

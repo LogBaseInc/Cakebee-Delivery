@@ -13,7 +13,6 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.support.v4.content.LocalBroadcastManager;
 import android.content.BroadcastReceiver;
-import io.logbase.stickandroidsdk.StickMobile;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
@@ -30,10 +29,7 @@ import java.util.TimerTask;
 import java.util.Timer;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
-import java.net.URL;
-import java.net.HttpURLConnection;
-import java.io.IOException;
+import io.logbase.stickandroidsdk.StickMobile;
 
 public class MyApp extends Application {
 
@@ -47,40 +43,30 @@ public class MyApp extends Application {
     Loggly loggly;
 
     public void AddTrackingLog(String log) {
-        InitializeLoggly();
-        Loggly.i(deviceID + "_Tracking", log);
-        System.out.println(log);
+        //InitializeLoggly();
+        //Loggly.i(deviceID + "_Tracking", log);
     }
 
     public void AddLoginLog(String log) {
-        InitializeLoggly();
-        Loggly.i(deviceID+"_Tracking", log);
+        //InitializeLoggly();
+        //Loggly.i(deviceID + "_Login", log);
     }
 
-    public void stopTracking() {
-        /*if(stick != null) {
-            stick.stop();
-        }*/
+    public void AddCurrentActivityLog(String log) {
+        //InitializeLoggly();
+        //Loggly.i(deviceID+"_Activity", log);
     }
 
     public void startDefaultTracking(){
         SharedPreferences sharedPref = getSharedPreferences(getString(R.string.app_name), Context.MODE_PRIVATE);
-        String trackDefault = sharedPref.getString("TrackDefault", null);
-
-        if(trackDefault.contains("true")) {
-            Integer trackDefaultFreq = sharedPref.getInt("TrackDefaultFreq", 0);
-            startTracking(trackDefaultFreq);
-        }
-        else{
-            stopTracking();
-        }
+        Integer trackDefaultFreq = sharedPref.getInt("TrackDefaultFreq", 0);
+        startTracking(trackDefaultFreq > 0 ? trackDefaultFreq : 30);
     }
 
-    public void startOrderTracking(){
+    public void startOrderTracking() {
         SharedPreferences sharedPref = getSharedPreferences(getString(R.string.app_name), Context.MODE_PRIVATE);
-
         Integer trackOrderFreq = sharedPref.getInt("TrackOrderFreq", 0);
-        startTracking(trackOrderFreq);
+        startTracking(trackOrderFreq > 0 ? trackOrderFreq : 10);
     }
 
     public void addOrders(String ordernumber, String deliverytime, boolean isam, boolean yettopick) {
@@ -189,7 +175,8 @@ public class MyApp extends Application {
             boolean stickStarted = stick.start();
             if (!stickStarted) {
                 ShowToast("Unable to start if blank device ID, no Network or GPS");
-                AddTrackingLog("Tracking not started. Internet Available: " + isInternetAvailable() +" .GPS Enabled: " + isGPSEnabled());
+                AddTrackingLog("Tracking not started. Internet Available: " + isInternetAvailable() + " .GPS Enabled: " + isGPSEnabled());
+                System.out.println("stick not started 1");
             }
         }
         else if(stick.isRunning() && updatefreq != frequency) {
@@ -210,7 +197,8 @@ public class MyApp extends Application {
             boolean stickStarted = stick.start();
             if (!stickStarted) {
                 ShowToast("Unable to start if blank device ID, no Network or GPS");
-                AddTrackingLog("Tracking not started. Internet Available: " + isInternetAvailable() +" .GPS Enabled: " + isGPSEnabled());
+                AddTrackingLog("Tracking not started. Internet Available: " + isInternetAvailable() + " .GPS Enabled: " + isGPSEnabled());
+                System.out.println("stick not started 2");
             }
         }
 

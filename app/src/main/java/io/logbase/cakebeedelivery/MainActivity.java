@@ -18,17 +18,12 @@ import com.firebase.client.Firebase;
 import com.firebase.client.ValueEventListener;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.FirebaseError;
-
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.ArrayList;
-import android.media.RingtoneManager;
-import android.net.Uri;
-import android.app.Notification;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
 import java.util.Date;
 import android.widget.Spinner;
@@ -36,15 +31,28 @@ import android.widget.ArrayAdapter;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.app.AlarmManager;
-import java.text.SimpleDateFormat;
 import java.util.Map;
+import java.util.Arrays;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.ActivityRecognition;
+import android.content.IntentFilter;
+import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
+import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
+import com.google.android.gms.common.ConnectionResult;
 
-public class MainActivity extends Activity implements OnItemSelectedListener{
+public class MainActivity extends Activity implements OnItemSelectedListener {
 
     public Context context;
     LBProcessDialog mDialog = null;
     String alerttype = "Ring tone";
+    GoogleApiClient mGApiClient;
+    BroadcastReceiver receiver;
+
     SharedPreferences sharedPref;
+    Integer trackDefaultFreq;
+    Integer trackOrderFreq;
+    String[] idleTrackitems = new String[]{"3", "5", "10", "30"};
+    String[] deliveryTrackitems = new String[]{"3", "5", "10"};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,11 +64,16 @@ public class MainActivity extends Activity implements OnItemSelectedListener{
 
         Firebase.setAndroidContext(this);
 
-        Spinner dropdown = (Spinner)findViewById(R.id.alerttype);
+        Spinner alerttypespinner = (Spinner)findViewById(R.id.alerttype);
         String[] items = new String[]{"Ring tone", "Notification"};
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, items);
-        dropdown.setAdapter(adapter);
-        dropdown.setOnItemSelectedListener(this);
+        alerttypespinner.setAdapter(adapter);
+        alerttypespinner.setOnItemSelectedListener(this);
+
+        Spinner idleTrackTime = (Spinner)findViewById(R.id.idleTrackTime);
+        ArrayAdapter<String> idleTrackadapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, idleTrackitems);
+        idleTrackTime.setAdapter(idleTrackadapter);
+        idleTrackTime.setOnItemSelectedListener(this);
 
         Button savebutton = (Button)findViewById(R.id.savebutton);
         savebutton.getBackground().setColorFilter(0xFF00b5ad, PorterDuff.Mode.MULTIPLY);
@@ -68,10 +81,12 @@ public class MainActivity extends Activity implements OnItemSelectedListener{
         String deviceID = sharedPref.getString("deviceID", null);
         String accountID = sharedPref.getString("accountID", null);
 
-        Spinner alerttypespinner = (Spinner)findViewById(R.id.alerttype);
+        Spinner deliveryTrackTime = (Spinner)findViewById(R.id.deliveryTrackTime);
 
         if(accountID != null && deviceID != null) {
             alerttypespinner.setVisibility(View.VISIBLE);
+            idleTrackTime.setVisibility(View.VISIBLE);
+            deliveryTrackTime.setVisibility(View.VISIBLE);
 
             String username = sharedPref.getString("username", null);
             String accountname = sharedPref.getString("accountname", null);
@@ -93,10 +108,72 @@ public class MainActivity extends Activity implements OnItemSelectedListener{
             }
         } else {
             alerttypespinner.setVisibility(View.GONE);
+            idleTrackTime.setVisibility(View.GONE);
+            deliveryTrackTime.setVisibility(View.GONE);
         }
+
+        //setActivityRecognition();
 
         registerAlarm(this);
     }
+
+   /*private void setActivityRecognition() {
+        mGApiClient = new GoogleApiClient.Builder(this)
+                .addApi(ActivityRecognition.API)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .build();
+        //Connect to Google API
+        mGApiClient.connect();
+
+        //Broadcast receiver
+        receiver  = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                //Add current time
+                String v =  intent.getStringExtra("activity") + " " +
+                        "Confidence : " + intent.getExtras().getInt("confidence") + "\n";
+
+                System.out.println("setActivityRecognition " + v);
+            }
+        };
+
+        //Filter the Intent and register broadcast receiver
+        IntentFilter filter = new IntentFilter();
+        filter.addAction("ImActive");
+        registerReceiver(receiver, filter);
+    }
+
+    @Override
+    public void onConnected(Bundle bundle) {
+        Intent i = new Intent(this, ActivityRecognitionIntentService.class);
+        PendingIntent mActivityRecongPendingIntent = PendingIntent
+                .getService(this, 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        System.out.println("connected to ActivityRecognition");
+        ActivityRecognition.ActivityRecognitionApi.requestActivityUpdates(mGApiClient, 0, mActivityRecongPendingIntent);
+
+        System.out.println("Connected to Google Play Services \nWaiting for Active Recognition... \n");
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+        System.out.println("Suspended to ActivityRecognition");
+    }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+        System.out.println("Not connected to ActivityRecognition");
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        //Disconnect and detach the receiver
+        mGApiClient.disconnect();
+        unregisterReceiver(receiver);
+    }*/
 
     @Override
     public void onResume() {
@@ -115,6 +192,34 @@ public class MainActivity extends Activity implements OnItemSelectedListener{
         else {
             alerttypespinner.setSelection(0);
         }
+
+        Spinner idleTrackTime = (Spinner)findViewById(R.id.idleTrackTime);
+        trackDefaultFreq = sharedPref.getInt("TrackDefaultFreq", 0);
+        trackDefaultFreq = trackDefaultFreq > 0 ? trackDefaultFreq : 30;
+        int indexOfidleTrackTime = Arrays.asList(idleTrackitems).indexOf(trackDefaultFreq.toString());
+        idleTrackTime.setSelection(indexOfidleTrackTime);
+
+        setDeliveryTrackTimeArray(trackDefaultFreq);
+    }
+
+    public void setDeliveryTrackTimeArray(int trackDefaultFreq) {
+        deliveryTrackitems = new String[]{"3", "5", "10"};
+        if(trackDefaultFreq == 3) {
+            deliveryTrackitems = new String[]{"3"};
+        }
+        else if(trackDefaultFreq == 5) {
+            deliveryTrackitems = new String[]{"3", "5"};
+        }
+
+        Spinner deliveryTrackTime = (Spinner)findViewById(R.id.deliveryTrackTime);
+        ArrayAdapter<String> deliveryTrackadapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, deliveryTrackitems);
+        deliveryTrackTime.setAdapter(deliveryTrackadapter);
+        deliveryTrackTime.setOnItemSelectedListener(this);
+
+        trackOrderFreq = sharedPref.getInt("TrackOrderFreq", 0);
+        trackOrderFreq = trackOrderFreq > 0 ? trackOrderFreq : 10;
+        int indexOfdeiveryTrackTime = Arrays.asList(deliveryTrackitems).indexOf(trackOrderFreq.toString());
+        deliveryTrackTime.setSelection(indexOfdeiveryTrackTime >=0 ? indexOfdeiveryTrackTime : (deliveryTrackitems.length -1));
     }
 
     @Override
@@ -134,7 +239,18 @@ public class MainActivity extends Activity implements OnItemSelectedListener{
 
     public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
         // An item was selected. You can retrieve the selected item using
-        alerttype = (String) parent.getItemAtPosition(pos);
+
+        switch(parent.getId()) {
+            case R.id.alerttype:
+                alerttype = (String) parent.getItemAtPosition(pos);
+                break;
+            case R.id.idleTrackTime:
+                String idleTime = (String)parent.getItemAtPosition(pos);
+                setDeliveryTrackTimeArray(Integer.parseInt(idleTime));
+                break;
+            case R.id.deliveryTrackTime:
+                break;
+        }
     }
 
     public void onNothingSelected(AdapterView<?> parent) {
@@ -223,7 +339,16 @@ public class MainActivity extends Activity implements OnItemSelectedListener{
         editor.putString("username", username);
         editor.putString("alerttype", alerttype);
 
+        Spinner idleTrackTime = (Spinner)findViewById(R.id.idleTrackTime);
+        String idleTime = idleTrackTime.getSelectedItem().toString();
+        editor.putInt("TrackDefaultFreq", Integer.parseInt(idleTime));
+
+        Spinner deliveryTrackTime = (Spinner)findViewById(R.id.deliveryTrackTime);
+        String deliveryTime = deliveryTrackTime.getSelectedItem().toString();
+        editor.putInt("TrackOrderFreq", Integer.parseInt(deliveryTime));
+
         editor.commit();
+
         OrderAdded(accountID, deviceID);
 
         Intent intent = new Intent(this, LoginActivity.class);
