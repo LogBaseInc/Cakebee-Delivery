@@ -153,7 +153,7 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
         System.out.println("connected to ActivityRecognition");
         ActivityRecognition.ActivityRecognitionApi.requestActivityUpdates(mGApiClient, 0, mActivityRecongPendingIntent);
 
-        System.out.println("Connected to Google Play Services \nWaiting for Active Recognition... \n");
+        System.out.println("Connected to Google Play Services ... Waiting for Active Recognition... \n");
     }
 
     @Override
@@ -173,6 +173,8 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
         //Disconnect and detach the receiver
         mGApiClient.disconnect();
         unregisterReceiver(receiver);
+
+        System.out.println("onDestroy");
     }*/
 
     @Override

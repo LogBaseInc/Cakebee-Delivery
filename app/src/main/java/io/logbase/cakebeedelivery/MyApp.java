@@ -29,7 +29,7 @@ import java.util.TimerTask;
 import java.util.Timer;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
-import io.logbase.stickandroidsdk.StickMobile;
+
 
 public class MyApp extends Application {
 
@@ -176,7 +176,6 @@ public class MyApp extends Application {
             if (!stickStarted) {
                 ShowToast("Unable to start if blank device ID, no Network or GPS");
                 AddTrackingLog("Tracking not started. Internet Available: " + isInternetAvailable() + " .GPS Enabled: " + isGPSEnabled());
-                System.out.println("stick not started 1");
             }
         }
         else if(stick.isRunning() && updatefreq != frequency) {
@@ -198,7 +197,6 @@ public class MyApp extends Application {
             if (!stickStarted) {
                 ShowToast("Unable to start if blank device ID, no Network or GPS");
                 AddTrackingLog("Tracking not started. Internet Available: " + isInternetAvailable() + " .GPS Enabled: " + isGPSEnabled());
-                System.out.println("stick not started 2");
             }
         }
 
