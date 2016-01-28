@@ -25,6 +25,7 @@ import com.google.android.gms.location.LocationServices;
 
 import java.text.SimpleDateFormat;
 import java.util.HashSet;
+import java.util.Objects;
 
 /**
  * Created by logbase on 30/11/15.
@@ -60,6 +61,8 @@ public class LoginActivity extends Activity implements ConnectionCallbacks, OnCo
 
         deviceID = sharedPref.getString("deviceID", null);
         accountID = sharedPref.getString("accountID", null);
+
+        getWebhookUrl();
 
         String accountname = sharedPref.getString("accountname", null);
         TextView title = (TextView)findViewById(R.id.title);
@@ -202,5 +205,26 @@ public class LoginActivity extends Activity implements ConnectionCallbacks, OnCo
         }
 
         GoToOrders();
+    }
+
+    private void getWebhookUrl() {
+        Firebase myFirebaseRef = new Firebase(getString(R.string.friebaseurl) + "accounts/"+accountID+"/settings/webhook/url");
+        myFirebaseRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                Object webhookurl = snapshot.getValue();
+
+                SharedPreferences sharedPref = getSharedPreferences(getString(R.string.app_name), Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor = sharedPref.edit();
+                editor.putBoolean("WebhookEnabled", ((webhookurl != null && webhookurl != "") ? true : false));
+                editor.putString("WebhookUrl", webhookurl.toString());
+                editor.commit();
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+                System.out.println("The webhookurl read failed: " + firebaseError.getMessage());
+            }
+        });
     }
 }

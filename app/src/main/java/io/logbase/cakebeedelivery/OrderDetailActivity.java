@@ -33,6 +33,14 @@ import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
 import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
 import com.google.android.gms.location.LocationServices;
 import android.net.Uri;
+import org.json.JSONException;
+import org.json.JSONObject;
+import java.net.URL;
+import java.io.DataOutputStream;
+import java.net.HttpURLConnection;
+import java.io.InputStreamReader;
+import java.io.InputStream;
+import java.io.BufferedReader;
 
 public class OrderDetailActivity extends Activity implements ConnectionCallbacks, OnConnectionFailedListener {
     public static Activity myActivity;
@@ -119,6 +127,8 @@ public class OrderDetailActivity extends Activity implements ConnectionCallbacks
         Firebase myFirebaseRef = new Firebase(getString(R.string.friebaseurl)+"accounts/"+accountID+"/orders/"+deviceID+"/"+currentDate+"/"+orderdetail.Id+"/Pickedon");
         myFirebaseRef.setValue(currentdateandtime);
 
+        sendActivity("PICKEDUP");
+
         getlocation(deviceID, currentDate, "Pickedat");
 
         startTracking(deviceID);
@@ -153,6 +163,8 @@ public class OrderDetailActivity extends Activity implements ConnectionCallbacks
 
         Firebase myFirebaseRef = new Firebase(getString(R.string.friebaseurl)+"accounts/"+accountID+"/orders/"+deviceID+"/"+currentDate+"/"+orderdetail.Id+"/Deliveredon");
         myFirebaseRef.setValue(currentdateandtime);
+
+        sendActivity("DELIVERED");
 
         getlocation(deviceID, currentDate, "Deliveredat");
         cancelclicked(null);
@@ -356,4 +368,84 @@ public class OrderDetailActivity extends Activity implements ConnectionCallbacks
         Button deliveredbtn = (Button)findViewById(R.id.deliveredbtn);
         deliveredbtn.setVisibility(View.VISIBLE);
     }
+
+    private void sendActivity(String activity){
+        boolean webhookEnabled =  sharedPref.getBoolean("WebhookEnabled", false);
+
+        if(webhookEnabled == true) {
+            String webhookUrl = sharedPref.getString("WebhookUrl", "");
+            if(webhookUrl != "") {
+                JSONObject order = new JSONObject();
+                try {
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+                    String currentDate = sdf.format(new java.util.Date());
+
+                    order.put("order_id", orderdetail.Id);
+                    order.put("account_id", accountID);
+                    order.put("hook_url", webhookUrl);
+                    order.put("delivery_date", currentDate);
+                    order.put("activity", activity);
+                    order.put("time_ms",  System.currentTimeMillis());
+
+                    System.out.println(order.toString());
+
+                    //excutePost(webhookUrl, order);
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    public static String excutePost(String targetURL, JSONObject order)
+    {
+        URL url;
+        HttpURLConnection connection = null;
+        try {
+            String body = order.toString();
+            //Create connection
+            url = new URL(targetURL);
+            connection = (HttpURLConnection)url.openConnection();
+            connection.setRequestMethod("POST");
+            connection.setRequestProperty("Content-Type","application/json");
+
+            connection.setRequestProperty("Content-Length", "" +
+                    Integer.toString(body.getBytes().length));
+            connection.setRequestProperty("Content-Language", "en-US");
+
+            connection.setUseCaches (false);
+            connection.setDoInput(true);
+            connection.setDoOutput(true);
+
+            //Send request
+            DataOutputStream wr = new DataOutputStream (
+                    connection.getOutputStream ());
+            wr.writeBytes (body);
+            wr.flush ();
+            wr.close ();
+
+            //Get Response
+            InputStream is = connection.getInputStream();
+            BufferedReader rd = new BufferedReader(new InputStreamReader(is));
+            String line;
+            StringBuffer response = new StringBuffer();
+            while((line = rd.readLine()) != null) {
+                response.append(line);
+                response.append('\r');
+            }
+            rd.close();
+            return response.toString();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        } finally {
+
+            if(connection != null) {
+                connection.disconnect();
+            }
+        }
+    }
+
 }

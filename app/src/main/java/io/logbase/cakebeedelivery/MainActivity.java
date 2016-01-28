@@ -33,20 +33,12 @@ import android.widget.AdapterView.OnItemSelectedListener;
 import android.app.AlarmManager;
 import java.util.Map;
 import java.util.Arrays;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.ActivityRecognition;
-import android.content.IntentFilter;
-import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
-import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
-import com.google.android.gms.common.ConnectionResult;
 
 public class MainActivity extends Activity implements OnItemSelectedListener {
 
     public Context context;
     LBProcessDialog mDialog = null;
     String alerttype = "Ring tone";
-    GoogleApiClient mGApiClient;
-    BroadcastReceiver receiver;
 
     SharedPreferences sharedPref;
     Integer trackDefaultFreq;
@@ -112,70 +104,8 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
             deliveryTrackTime.setVisibility(View.GONE);
         }
 
-        //setActivityRecognition();
-
         registerAlarm(this);
     }
-
-   /*private void setActivityRecognition() {
-        mGApiClient = new GoogleApiClient.Builder(this)
-                .addApi(ActivityRecognition.API)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .build();
-        //Connect to Google API
-        mGApiClient.connect();
-
-        //Broadcast receiver
-        receiver  = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                //Add current time
-                String v =  intent.getStringExtra("activity") + " " +
-                        "Confidence : " + intent.getExtras().getInt("confidence") + "\n";
-
-                System.out.println("setActivityRecognition " + v);
-            }
-        };
-
-        //Filter the Intent and register broadcast receiver
-        IntentFilter filter = new IntentFilter();
-        filter.addAction("ImActive");
-        registerReceiver(receiver, filter);
-    }
-
-    @Override
-    public void onConnected(Bundle bundle) {
-        Intent i = new Intent(this, ActivityRecognitionIntentService.class);
-        PendingIntent mActivityRecongPendingIntent = PendingIntent
-                .getService(this, 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
-
-        System.out.println("connected to ActivityRecognition");
-        ActivityRecognition.ActivityRecognitionApi.requestActivityUpdates(mGApiClient, 0, mActivityRecongPendingIntent);
-
-        System.out.println("Connected to Google Play Services ... Waiting for Active Recognition... \n");
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-        System.out.println("Suspended to ActivityRecognition");
-    }
-
-    @Override
-    public void onConnectionFailed(ConnectionResult connectionResult) {
-        System.out.println("Not connected to ActivityRecognition");
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-
-        //Disconnect and detach the receiver
-        mGApiClient.disconnect();
-        unregisterReceiver(receiver);
-
-        System.out.println("onDestroy");
-    }*/
 
     @Override
     public void onResume() {
