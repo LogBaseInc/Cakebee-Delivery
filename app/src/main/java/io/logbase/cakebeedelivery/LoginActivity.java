@@ -217,7 +217,7 @@ public class LoginActivity extends Activity implements ConnectionCallbacks, OnCo
                 SharedPreferences sharedPref = getSharedPreferences(getString(R.string.app_name), Context.MODE_PRIVATE);
                 SharedPreferences.Editor editor = sharedPref.edit();
                 editor.putBoolean("WebhookEnabled", ((webhookurl != null && webhookurl != "") ? true : false));
-                editor.putString("WebhookUrl", webhookurl.toString());
+                editor.putString("WebhookUrl", webhookurl != null ? webhookurl.toString() : "");
                 editor.commit();
             }
 

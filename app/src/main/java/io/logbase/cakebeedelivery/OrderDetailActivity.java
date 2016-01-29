@@ -371,10 +371,9 @@ public class OrderDetailActivity extends Activity implements ConnectionCallbacks
 
     private void sendActivity(String activity){
         boolean webhookEnabled =  sharedPref.getBoolean("WebhookEnabled", false);
-
         if(webhookEnabled == true) {
             String webhookUrl = sharedPref.getString("WebhookUrl", "");
-            if(webhookUrl != "") {
+            if(webhookUrl != null && webhookUrl != "") {
                 JSONObject order = new JSONObject();
                 try {
                     SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
@@ -386,7 +385,7 @@ public class OrderDetailActivity extends Activity implements ConnectionCallbacks
                     order.put("delivery_date", currentDate);
                     order.put("activity", activity);
                     order.put("time_ms", System.currentTimeMillis());
-
+                    
                     excutePost(order);
 
                 } catch (JSONException e) {
