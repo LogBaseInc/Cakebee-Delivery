@@ -57,6 +57,11 @@ public class MyApp extends Application {
         //Loggly.i(deviceID+"_Activity", log);
     }
 
+    public void AddEventActivityLog(String log) {
+        InitializeLoggly();
+        Loggly.i(deviceID+"_Event", log);
+    }
+
     public void startDefaultTracking(){
         SharedPreferences sharedPref = getSharedPreferences(getString(R.string.app_name), Context.MODE_PRIVATE);
         Integer trackDefaultFreq = sharedPref.getInt("TrackDefaultFreq", 0);

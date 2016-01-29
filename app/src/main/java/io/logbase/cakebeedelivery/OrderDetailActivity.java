@@ -18,6 +18,8 @@ import android.widget.TextView;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
 import java.text.SimpleDateFormat;
 import android.graphics.PorterDuff;
 import android.content.DialogInterface;
@@ -38,9 +40,7 @@ import org.json.JSONObject;
 import java.net.URL;
 import java.io.DataOutputStream;
 import java.net.HttpURLConnection;
-import java.io.InputStreamReader;
-import java.io.InputStream;
-import java.io.BufferedReader;
+import android.os.AsyncTask;
 
 public class OrderDetailActivity extends Activity implements ConnectionCallbacks, OnConnectionFailedListener {
     public static Activity myActivity;
@@ -53,11 +53,11 @@ public class OrderDetailActivity extends Activity implements ConnectionCallbacks
     private String deviceID;
     private String accountID;
     private String currentDate;
-    String locationtype;
     SharedPreferences sharedPref;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.order_detail);
         context = this;
@@ -385,67 +385,89 @@ public class OrderDetailActivity extends Activity implements ConnectionCallbacks
                     order.put("hook_url", webhookUrl);
                     order.put("delivery_date", currentDate);
                     order.put("activity", activity);
-                    order.put("time_ms",  System.currentTimeMillis());
+                    order.put("time_ms", System.currentTimeMillis());
 
-                    System.out.println(order.toString());
-
-                    //excutePost(webhookUrl, order);
+                    excutePost(order);
 
                 } catch (JSONException e) {
+                    e.printStackTrace();
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
         }
     }
 
-    public static String excutePost(String targetURL, JSONObject order)
+
+    // HTTP POST request
+    private void excutePost(JSONObject order) throws Exception
     {
-        URL url;
-        HttpURLConnection connection = null;
-        try {
-            String body = order.toString();
-            //Create connection
-            url = new URL(targetURL);
-            connection = (HttpURLConnection)url.openConnection();
-            connection.setRequestMethod("POST");
-            connection.setRequestProperty("Content-Type","application/json");
+        final String body = order.toString();
+            AsyncTask.execute(new Runnable() {
+                @Override
+                public void run() {
+                    String type = "application/json";
+                    URL url = null;
+                    boolean repeat = false;
+                    do {
+                        String error = null;
+                        int responsecode = 0;
+                        HttpURLConnection conn = null;
+                        try {
 
-            connection.setRequestProperty("Content-Length", "" +
-                    Integer.toString(body.getBytes().length));
-            connection.setRequestProperty("Content-Language", "en-US");
+                            url = new URL("http://stick-write-dev.logbase.io/api/events/app");
+                            conn = (HttpURLConnection) url.openConnection();
+                            conn.setReadTimeout(10000 /* milliseconds */);
+                            conn.setConnectTimeout(15000 /* milliseconds */);
+                            conn.setInstanceFollowRedirects(false);
+                            conn.setRequestMethod("POST");
+                            conn.setDoInput(true);
+                            conn.setDoOutput(true);
+                            conn.setRequestProperty("Content-Type", "application/json");
+                            conn.setRequestProperty("charset", "utf-8");
+                            conn.setRequestProperty("Content-Length", "" + Integer.toString(body.getBytes().length));
+                            conn.setUseCaches(false);
 
-            connection.setUseCaches (false);
-            connection.setDoInput(true);
-            connection.setDoOutput(true);
+                            DataOutputStream wr = new DataOutputStream(conn.getOutputStream());
+                            wr.writeBytes(body);
+                            wr.flush();
+                            wr.close();
 
-            //Send request
-            DataOutputStream wr = new DataOutputStream (
-                    connection.getOutputStream ());
-            wr.writeBytes (body);
-            wr.flush ();
-            wr.close ();
+                            conn.connect();
 
-            //Get Response
-            InputStream is = connection.getInputStream();
-            BufferedReader rd = new BufferedReader(new InputStreamReader(is));
-            String line;
-            StringBuffer response = new StringBuffer();
-            while((line = rd.readLine()) != null) {
-                response.append(line);
-                response.append('\r');
-            }
-            rd.close();
-            return response.toString();
+                            responsecode = conn.getResponseCode();
+                            if(responsecode == 200) {
+                                repeat = false;
+                                error = null;
+                            }
+                            else {
+                                repeat = !repeat;
+                                error = conn.getResponseMessage();
+                            }
 
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        } finally {
+                        } catch (MalformedURLException e) {
+                            repeat = !repeat;
+                            error = "MalformedURLException";
+                            e.printStackTrace();
+                        } catch (ProtocolException e) {
+                            repeat = !repeat;
+                            error = "ProtocolException";
+                            e.printStackTrace();
+                        } catch (IOException e) {
+                            repeat = !repeat;
+                            error = "IOException";
+                            e.printStackTrace();
+                        }
 
-            if(connection != null) {
-                connection.disconnect();
-            }
-        }
+                        if(conn != null)
+                            conn.disconnect();
+
+                        if(repeat == false && error != null)
+                            ((MyApp) context.getApplicationContext()).AddEventActivityLog(body + " Error: "+error + " Responsecode: "+ responsecode );
+
+                    }
+                    while(repeat == true);
+                }
+            });
     }
-
 }
