@@ -175,7 +175,17 @@ public class OrderDetailActivity extends Activity implements ConnectionCallbacks
         startActivity(intent);
     }
 
-    public void viewrouteclicked(View view){
+    public void acceptOrder(View view){
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+        String currentdateandtime = sdf.format(new java.util.Date());
+
+        Firebase myFirebaseRef = new Firebase(getString(R.string.friebaseurl)+"accounts/"+accountID+"/orders/"+deviceID+"/"+currentDate+"/"+orderdetail.Id+"/Acceptedon");
+        myFirebaseRef.setValue(currentdateandtime);
+
+        cancelclicked(null);
+    }
+
+    public void viewrouteclicked(View view) {
         Uri gmmIntentUri = Uri.parse("geo:0,0?q="+orderdetail.Address);
         Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
         mapIntent.setPackage("com.google.android.apps.maps");
@@ -209,6 +219,8 @@ public class OrderDetailActivity extends Activity implements ConnectionCallbacks
         // More about this in the next section.
         //ShowToast("onConnectionFailed: ");
     }
+
+
 
     private void setGoogleApiClient() {
         mGoogleApiClient = new GoogleApiClient.Builder(this)
@@ -252,11 +264,13 @@ public class OrderDetailActivity extends Activity implements ConnectionCallbacks
 
         orderdetail = mapper.convertValue(actualObj, OrderDetails.class);
 
+        Button acceptbtn = (Button)findViewById(R.id.acceptbtn);
+        acceptbtn.getBackground().setColorFilter(0xFF00b5ad, PorterDuff.Mode.MULTIPLY);
+
         Button pickupbtn = (Button)findViewById(R.id.pickupbtn);
         pickupbtn.getBackground().setColorFilter(0xFF00b5ad, PorterDuff.Mode.MULTIPLY);
 
         Button deliveredbtn = (Button)findViewById(R.id.deliveredbtn);
-        deliveredbtn.setVisibility(View.GONE);
         deliveredbtn.getBackground().setColorFilter(0xFF00b5ad, PorterDuff.Mode.MULTIPLY);
 
         String lastupdate = sharedPref.getString("lastupdate", null);
@@ -315,29 +329,40 @@ public class OrderDetailActivity extends Activity implements ConnectionCallbacks
             itemslabel.setVisibility(View.GONE);
         }
 
+        Button acceptbtn = (Button)findViewById(R.id.acceptbtn);
         Button pickupbtn = (Button)findViewById(R.id.pickupbtn);
         Button deliveredbtn = (Button)findViewById(R.id.deliveredbtn);
         Button viewroutebtn = (Button)findViewById(R.id.viewroutegtn);
 
-        if(orderdetail.Status == "Picked up") {
+
+        if(orderdetail.Status == "Yet to accept") {
+            acceptbtn.setVisibility(View.VISIBLE);
+            pickupbtn.setVisibility(View.GONE);
+            deliveredbtn.setVisibility(View.GONE);
+            viewroutebtn.setVisibility(View.GONE);
+        }
+        else if(orderdetail.Status == "Picked up") {
+            acceptbtn.setVisibility(View.GONE);
             pickupbtn.setVisibility(View.GONE);
             deliveredbtn.setVisibility(View.VISIBLE);
             viewroutebtn.setVisibility(View.VISIBLE);
         }
         else if(orderdetail.Status == "Delivered") {
+            acceptbtn.setVisibility(View.GONE);
             pickupbtn.setVisibility(View.GONE);
             deliveredbtn.setVisibility(View.GONE);
             viewroutebtn.setVisibility(View.GONE);
         }
         else {
+            acceptbtn.setVisibility(View.GONE);
             pickupbtn.setVisibility(View.VISIBLE);
             deliveredbtn.setVisibility(View.GONE);
             viewroutebtn.setVisibility(View.VISIBLE);
         }
     }
-    
+
     private void getOrderDetails() {
-        Firebase myFirebaseRef =  new Firebase(getString(R.string.friebaseurl)+"accounts/"+accountID+"/orders/"+deviceID+"/"+currentDate + "/" + orderdetail.Id);
+        Firebase myFirebaseRef = new Firebase(getString(R.string.friebaseurl) + "accounts/" + accountID + "/orders/" + deviceID + "/" + currentDate + "/" + orderdetail.Id);
         myFirebaseRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot snapshot) {
@@ -347,8 +372,11 @@ public class OrderDetailActivity extends Activity implements ConnectionCallbacks
                     orderdetail.Status = "Delivered";
                 } else if (orderdetail.Pickedon != null && orderdetail.Pickedon != "") {
                     orderdetail.Status = "Picked up";
-                } else {
+                } else if (orderdetail.Acceptedon != null && orderdetail.Acceptedon != "") {
                     orderdetail.Status = "Yet to pick";
+                }
+                else{
+                    orderdetail.Status = "Yet to accept";
                 }
 
                 setOrderDetails();
@@ -385,7 +413,7 @@ public class OrderDetailActivity extends Activity implements ConnectionCallbacks
                     order.put("delivery_date", currentDate);
                     order.put("activity", activity);
                     order.put("time_ms", System.currentTimeMillis());
-                    
+
                     excutePost(order);
 
                 } catch (JSONException e) {

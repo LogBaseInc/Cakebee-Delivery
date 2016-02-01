@@ -9,6 +9,7 @@
     <string name="mobile">Mobile: </string>
     <string name="amount">Amount to collect: </string>
     <string name="goback">Go back</string>
+    <string name="accept">Accept</string>
     <string name="pickup">PickUp</string>
     <string name="lastupdatesentat">Last update sent at</string>
     <string name="delivered">Delivered</string>

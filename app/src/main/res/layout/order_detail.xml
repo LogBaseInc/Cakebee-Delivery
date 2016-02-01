@@ -12,13 +12,24 @@
         android:layout_height="50dp"
         android:background="#00b5ad"
         android:baselineAligned="false">
+
+        <Button
+            android:id="@+id/backbtn"
+            android:gravity="left"
+            android:layout_width="22dp"
+            android:layout_height="22dp"
+            android:layout_marginLeft="5dp"
+            android:background="@drawable/backarrow"
+            android:layout_gravity="center_vertical"
+            android:onClick="cancelclicked"/>
+
         <TextView
             android:id="@+id/title"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="0.7"
             android:gravity="center"
-            android:textSize="20sp"
+            android:textSize="15sp"
             android:textStyle = "bold"
             android:text="Deliveries"
             android:textColor="#ffffff"
@@ -53,7 +64,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="0.35"
-                    android:textSize="18sp"
+                    android:textSize="13sp"
                     android:text="@string/time" />
 
                 <TextView
@@ -62,7 +73,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="0.65"
                     android:ems="10"
-                    android:textSize="18sp"
+                    android:textSize="13sp"
                     android:textColor="#000000" />
             </LinearLayout>
 
@@ -77,7 +88,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="0.35"
                     android:text="@string/name"
-                    android:textSize="18sp"/>
+                    android:textSize="13sp" />
 
                 <TextView
                     android:id="@+id/namelabel"
@@ -85,7 +96,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="0.65"
                     android:ems="10"
-                    android:textSize="18sp"
+                    android:textSize="13sp"
                     android:textColor="#000000"/>
             </LinearLayout>
 
@@ -99,7 +110,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="0.35"
-                    android:textSize="18sp"
+                    android:textSize="13sp"
                     android:text="@string/address" />
 
                 <TextView
@@ -108,7 +119,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="0.65"
                     android:ems="10"
-                    android:textSize="18sp"
+                    android:textSize="13sp"
                     android:textColor="#000000"/>
             </LinearLayout>
 
@@ -123,7 +134,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="0.35"
                     android:text="@string/mobile"
-                    android:textSize="18sp"/>
+                    android:textSize="13sp"/>
 
                 <TextView
                     android:id="@+id/phonelabel"
@@ -133,7 +144,7 @@
                     android:ems="10"
                     android:autoLink="phone"
                     android:textColor="#000000"
-                    android:textSize="18sp"/>
+                    android:textSize="13sp"/>
             </LinearLayout>
 
             <LinearLayout
@@ -148,7 +159,7 @@
                     android:layout_gravity="center_vertical"
                     android:layout_weight="0.35"
                     android:text="@string/amount"
-                    android:textSize="18sp"/>
+                    android:textSize="13sp"/>
 
                 <TextView
                     android:id="@+id/amountlabel"
@@ -158,7 +169,7 @@
                     android:ems="10"
                     android:text="Rs 0"
                     android:textColor="#000000"
-                    android:textSize="18sp"/>
+                    android:textSize="13sp"/>
             </LinearLayout>
             <TextView xmlns:android="http://schemas.android.com/apk/res/android"
                 android:id="@+id/itemslabel"
@@ -169,7 +180,7 @@
                 android:paddingTop="10dp"
                 android:textStyle="bold"
                 android:text="Items"
-                android:textSize="18sp">
+                android:textSize="13sp">
             </TextView>
 
             <TextView xmlns:android="http://schemas.android.com/apk/res/android"
@@ -180,7 +191,7 @@
                 android:layout_alignParentEnd="true"
                 android:paddingTop="10dp"
                 android:textColor="#000000"
-                android:textSize="18sp">
+                android:textSize="13sp">
             </TextView>
 
             <LinearLayout
@@ -191,12 +202,25 @@
                 android:gravity="center">
 
                 <Button
+                    android:id="@+id/acceptbtn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ems="5"
+                    android:text="@string/accept"
+                    android:textColor="#ffffff"
+                    android:textSize="15sp"
+                    android:textAllCaps="false"
+                    android:onClick="acceptOrder"/>
+
+                <Button
                     android:id="@+id/pickupbtn"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:ems="5"
                     android:text="@string/pickup"
                     android:textColor="#ffffff"
+                    android:textSize="15sp"
+                    android:textAllCaps="false"
                     android:onClick="pickupclicked"/>
 
                 <Button
@@ -206,16 +230,9 @@
                     android:ems="6"
                     android:text="@string/delivered"
                     android:textColor="#ffffff"
+                    android:textSize="15sp"
+                    android:textAllCaps="false"
                     android:onClick="delivered"/>
-
-                <Button
-                    android:id="@+id/cancelbtn"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:ems="5"
-                    android:text="@string/goback"
-                    android:textColor="#ffffff"
-                    android:onClick="cancelclicked"/>
 
                 <Button
                     android:id="@+id/viewroutegtn"
@@ -224,6 +241,8 @@
                     android:ems="7"
                     android:text="@string/viewroute"
                     android:textColor="#ffffff"
+                    android:textSize="15sp"
+                    android:textAllCaps="false"
                     android:onClick="viewrouteclicked"/>
             </LinearLayout>
 
@@ -241,7 +260,7 @@
                     android:layout_height="wrap_content"
                     android:text="@string/lastupdatesentat"
                     android:id="@+id/msg"
-                    android:textSize="18sp"
+                    android:textSize="12sp"
                     android:layout_above="@+id/clock"
                     android:layout_alignParentRight="true"
                     android:layout_alignParentEnd="true"/>
@@ -250,7 +269,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="NA"
-                    android:textSize="18sp"
+                    android:textSize="12sp"
                     android:id="@+id/clock"
                     android:layout_alignParentBottom="true"
                     android:layout_alignParentRight="true"

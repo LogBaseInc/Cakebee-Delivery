@@ -12,6 +12,8 @@ import android.os.Bundle;
 import android.widget.TextView;
 import android.widget.ListView;
 import android.view.View;
+import android.widget.Toast;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.firebase.client.Firebase;
 import com.firebase.client.ValueEventListener;
@@ -33,6 +35,7 @@ public class OrdersActivity extends ListActivity {
     Context context;
     String currentDate;
     LBProcessDialog mDialog = null;
+    boolean doubleBackToExitPressedOnce = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -105,44 +108,41 @@ public class OrdersActivity extends ListActivity {
                                         boolean ispickupam = true;
                                         boolean isdeliveryam = true;
 
-                                        if(!(orderdet.Time.contains("Mid"))) {
+                                        if (!(orderdet.Time.contains("Mid"))) {
                                             orderdet.Time = orderdet.Time.toLowerCase();
-                                            if(orderdet.Time.contains(":")) {
+                                            if (orderdet.Time.contains(":")) {
                                                 orderdet.Time = orderdet.Time.replaceAll(":", ".");
                                             }
 
                                             timesplit = orderdet.Time.split("-");
-                                            if(timesplit.length >= 2) {
+                                            if (timesplit.length >= 2) {
                                                 timesplit[0] = timesplit[0].replaceAll(" ", "");
                                                 timesplit[1] = timesplit[1].replaceAll(" ", "");
 
                                                 Boolean ispm = false;
                                                 isdeliveryam = !(timesplit[1].contains("pm"));
-                                                if(timesplit[0].contains("am")) {
+                                                if (timesplit[0].contains("am")) {
                                                     ispm = false;
                                                     ispickupam = true;
                                                     timesplit[1] = timesplit[1].replaceAll("am", "");
                                                     timesplit[1] = timesplit[1].replaceAll("pm", "");
                                                     if (Double.parseDouble(timesplit[1]) == 12)
                                                         isdeliveryam = true;
-                                                }
-                                                else if(timesplit[0].contains("pm")){
+                                                } else if (timesplit[0].contains("pm")) {
                                                     ispm = true;
                                                     ispickupam = false;
                                                     timesplit[1] = timesplit[1].replaceAll("am", "");
                                                     timesplit[1] = timesplit[1].replaceAll("pm", "");
                                                     if (Double.parseDouble(timesplit[1]) == 12)
                                                         isdeliveryam = true;
-                                                }
-                                                else {
+                                                } else {
                                                     if (timesplit[1].indexOf("pm") >= 0 && Double.parseDouble(timesplit[0]) >= 1 && Double.parseDouble(timesplit[0]) < 12) {
                                                         timesplit[1] = timesplit[1].replaceAll("am", "");
                                                         timesplit[1] = timesplit[1].replaceAll("pm", "");
                                                         if (Double.parseDouble(timesplit[1]) != 12) {
                                                             ispm = true;
                                                             ispickupam = false;
-                                                        }
-                                                        else {
+                                                        } else {
                                                             isdeliveryam = true;
                                                         }
                                                     }
@@ -152,46 +152,45 @@ public class OrdersActivity extends ListActivity {
                                                 timesplit[0] = timesplit[0].replaceAll("pm", "");
 
                                                 orderdet.TimeSort = (Double.isNaN(Double.parseDouble(timesplit[0])) ? 24 : (ispm ? (Double.parseDouble(timesplit[0]) + 12) : Double.parseDouble(timesplit[0])));
-                                            }
-                                            else
+                                            } else
                                                 orderdet.TimeSort = 0.0;
-                                        }
-                                        else {
+                                        } else {
                                             orderdet.TimeSort = 24.0;
                                         }
 
                                         orderdet.Name = upperCaseFirst(orderdet.Name);
                                         orderdet.Id = entry.getKey();
 
-                                        if(orderdet.Deliveredon != null && orderdet.Deliveredon != "") {
+                                        if (orderdet.Deliveredon != null && orderdet.Deliveredon != "") {
                                             orderdet.Status = "Delivered";
                                             ((MyApp) context.getApplicationContext()).removeOrders(orderdet.Id, false);
-                                        }
-                                        else if(orderdet.Pickedon != null && orderdet.Pickedon != "") {
+                                        } else if (orderdet.Pickedon != null && orderdet.Pickedon != "") {
                                             orderdet.Status = "Picked up";
                                             pickedupordercount = pickedupordercount + 1;
 
                                             ((MyApp) context.getApplicationContext()).removeOrders(orderdet.Id, true);
-                                            if(timesplit.length >= 1)
+                                            if (timesplit.length >= 1)
                                                 ((MyApp) context.getApplicationContext()).addOrders(orderdet.Id, timesplit[1], isdeliveryam, false);
-                                        }
-                                        else {
-                                            orderdet.Status = "Yet to pick";
+                                        } else {
+                                            if(orderdet.Acceptedon != null && orderdet.Acceptedon != "")
+                                                orderdet.Status = "Yet to pick";
+                                            else
+                                                orderdet.Status = "Yet to accept";
 
-                                            if(timesplit.length >= 1)
+                                            if (timesplit.length >= 1)
                                                 ((MyApp) context.getApplicationContext()).addOrders(orderdet.Id, timesplit[0], ispickupam, true);
 
-                                            if(timesplit.length >= 2)
+                                            if (timesplit.length >= 2)
                                                 ((MyApp) context.getApplicationContext()).addOrders(orderdet.Id, timesplit[1], isdeliveryam, false);
                                         }
+
                                         orderDetaillist.add(orderdet);
                                     }
                                 }
                             }
-                            if(pickedupordercount > 0) {
+                            if (pickedupordercount > 0) {
                                 startOrderTracking();
-                            }
-                            else {
+                            } else {
                                 startDefaultTracking();
                             }
 
@@ -265,10 +264,19 @@ public class OrdersActivity extends ListActivity {
         startActivity(intent);
     }
 
+    public void orderClicked(View view) {
+        View parentRow = (View) view.getParent();
+        ListView listView = (ListView) parentRow.getParent();
+        int position = listView.getPositionForView(parentRow);
+        OrderDetails orderDetail = orderDetaillist.get(position);
+        showOrderDetails(orderDetail);
+    }
+
     @Override
     public void onResume()
     {
         super.onResume();
+        doubleBackToExitPressedOnce = false;
         ((MyApp) context.getApplicationContext()).setCurrentActivity(this);
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
@@ -290,6 +298,26 @@ public class OrdersActivity extends ListActivity {
         }
     }
 
+    @Override
+    public void onBackPressed() {
+        if (doubleBackToExitPressedOnce) {
+            Intent intent = new Intent(Intent.ACTION_MAIN);
+            intent.addCategory(Intent.CATEGORY_HOME);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+            return;
+        }
+        this.doubleBackToExitPressedOnce = true;
+        Toast.makeText(this, "Tap again to exit", Toast.LENGTH_SHORT).show();
+        new android.os.Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+
+                doubleBackToExitPressedOnce = false;
+            }
+        }, 2000);
+    }
+
     private void showOrderDetails(OrderDetails orderDetails) {
         String orderjson = "";
         ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
@@ -302,10 +330,5 @@ public class OrdersActivity extends ListActivity {
         Intent intent = new Intent(this, OrderDetailActivity.class);
         intent.putExtra("Order",orderjson);
         startActivity(intent);
-    }
-    @Override
-    protected void onListItemClick(ListView l, View v, int position, long id) {
-        OrderDetails orderDetails = orderDetaillist.get(position);
-        showOrderDetails(orderDetails);
     }
 }

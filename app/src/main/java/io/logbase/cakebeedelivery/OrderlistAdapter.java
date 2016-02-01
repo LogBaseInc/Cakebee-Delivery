@@ -8,8 +8,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.TextView;
 import java.util.List;
+import android.graphics.Color;
 
 public class OrderlistAdapter extends ArrayAdapter<OrderDetails> {
     private final Context context;
@@ -38,7 +40,22 @@ public class OrderlistAdapter extends ArrayAdapter<OrderDetails> {
         textView2.setText(orderDetail.Name);
         textView3.setText(orderDetail.Address);
         textView4.setText(orderDetail.Status);
-
+        textView4.setBackgroundColor(Color.parseColor(getColorCode(orderDetail)));
         return rowView;
+    }
+
+    public String getColorCode(OrderDetails orderDetail) {
+        if(orderDetail.Status == "Yet to pick") {
+            return "#7986CB";
+        }
+        else if(orderDetail.Status == "Picked up") {
+            return "#BA68C8";
+        }
+        else if(orderDetail.Status == "Delivered") {
+            return "#66BB6A";
+        }
+        else {
+            return "#FF9800";
+        }
     }
 }

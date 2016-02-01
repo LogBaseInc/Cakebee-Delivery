@@ -11,7 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:gravity="center"
-        android:textSize="20sp"
+        android:textSize="15sp"
         android:textStyle = "bold"
         android:text="Delivery"
         android:textColor="#ffffff"
@@ -19,14 +19,14 @@
         android:layout_gravity="center_vertical"/>
 
     <Button
-        android:layout_width="100dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Login"
         android:id="@+id/loginButton"
         android:onClick="login"
-        android:paddingLeft="10dp"
-        android:paddingRight="10dp"
+        android:ems="5"
         android:textAllCaps="false"
+        android:textSize="15sp"
         android:layout_centerVertical="true"
         android:layout_centerHorizontal="true"
         android:textColor="#ffffff"/>

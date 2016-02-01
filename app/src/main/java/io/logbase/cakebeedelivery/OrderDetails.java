@@ -24,6 +24,8 @@ public class OrderDetails implements Comparable {
     @JsonIgnoreProperties(ignoreUnknown = true)
     public String Mobile;
     @JsonIgnoreProperties(ignoreUnknown = true)
+    public String Acceptedon;
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public String Pickedon;
     @JsonIgnoreProperties(ignoreUnknown = true)
     public String Pickedat;

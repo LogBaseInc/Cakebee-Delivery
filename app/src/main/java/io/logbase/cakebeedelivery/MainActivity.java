@@ -12,6 +12,7 @@ import android.widget.Button;
 import android.content.SharedPreferences;
 import android.content.Context;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 import com.firebase.client.ChildEventListener;
 import com.firebase.client.Firebase;
@@ -70,26 +71,31 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
         Button savebutton = (Button)findViewById(R.id.savebutton);
         savebutton.getBackground().setColorFilter(0xFF00b5ad, PorterDuff.Mode.MULTIPLY);
 
+        Button savebutton1 = (Button)findViewById(R.id.savebutton1);
+        savebutton1.getBackground().setColorFilter(0xFF00b5ad, PorterDuff.Mode.MULTIPLY);
+
         String deviceID = sharedPref.getString("deviceID", null);
         String accountID = sharedPref.getString("accountID", null);
 
-        Spinner deliveryTrackTime = (Spinner)findViewById(R.id.deliveryTrackTime);
+        LinearLayout editlayout = (LinearLayout)findViewById(R.id.editlayout);
+        LinearLayout newlayout = (LinearLayout)findViewById(R.id.newlayout);
 
         if(accountID != null && deviceID != null) {
-            alerttypespinner.setVisibility(View.VISIBLE);
-            idleTrackTime.setVisibility(View.VISIBLE);
-            deliveryTrackTime.setVisibility(View.VISIBLE);
+            newlayout.setVisibility(View.GONE);
+            editlayout.setVisibility(View.VISIBLE);
 
             String username = sharedPref.getString("username", null);
             String accountname = sharedPref.getString("accountname", null);
 
-            EditText usernametext = (EditText)findViewById(R.id.username);
+            EditText usernametext = (EditText)findViewById(R.id.editusername);
+            EditText usernametext1 = (EditText)findViewById(R.id.username);
             usernametext.setText(username);
-            usernametext.setEnabled(false);
+            usernametext1.setText(username);
 
-            EditText accountnametext = (EditText)findViewById(R.id.accountname);
+            EditText accountnametext = (EditText)findViewById(R.id.editaccountname);
+            EditText accountnametext1 = (EditText)findViewById(R.id.accountname);
             accountnametext.setText(accountname);
-            accountnametext.setEnabled(false);
+            accountnametext1.setText(accountname);
 
             OrderAdded(accountID, deviceID);
 
@@ -99,9 +105,8 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
                 startActivity(intent);
             }
         } else {
-            alerttypespinner.setVisibility(View.GONE);
-            idleTrackTime.setVisibility(View.GONE);
-            deliveryTrackTime.setVisibility(View.GONE);
+            newlayout.setVisibility(View.VISIBLE);
+            editlayout.setVisibility(View.GONE);
         }
 
         registerAlarm(this);
