@@ -377,19 +377,22 @@ public class OrderDetailActivity extends Activity implements ConnectionCallbacks
             @Override
             public void onDataChange(DataSnapshot snapshot) {
                 orderdetail = snapshot.getValue(OrderDetails.class);
-                orderdetail.Id = snapshot.getKey();
-                if (orderdetail.Deliveredon != null && orderdetail.Deliveredon != "") {
-                    orderdetail.Status = "Delivered";
-                } else if (orderdetail.Pickedon != null && orderdetail.Pickedon != "") {
-                    orderdetail.Status = "Picked up";
-                } else if (orderdetail.Acceptedon != null && orderdetail.Acceptedon != "") {
-                    orderdetail.Status = "Yet to pick";
-                }
-                else{
-                    orderdetail.Status = "Yet to accept";
-                }
+                if(orderdetail != null) {
+                    orderdetail.Id = snapshot.getKey();
+                    if (orderdetail.Deliveredon != null && orderdetail.Deliveredon != "") {
+                        orderdetail.Status = "Delivered";
+                    } else if (orderdetail.Pickedon != null && orderdetail.Pickedon != "") {
+                        orderdetail.Status = "Picked up";
+                    } else if (orderdetail.Acceptedon != null && orderdetail.Acceptedon != "") {
+                        orderdetail.Status = "Yet to pick";
+                    } else {
+                        orderdetail.Status = "Yet to accept";
+                    }
 
-                setOrderDetails();
+                    setOrderDetails();
+                }
+                else
+                    cancelclicked(null);
             }
 
             @Override

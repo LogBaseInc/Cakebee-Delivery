@@ -64,15 +64,15 @@ public class MyApp extends Application {
     }
 
     public void startDefaultTracking(){
-        /*SharedPreferences sharedPref = getSharedPreferences(getString(R.string.app_name), Context.MODE_PRIVATE);
+        SharedPreferences sharedPref = getSharedPreferences(getString(R.string.app_name), Context.MODE_PRIVATE);
         Integer trackDefaultFreq = sharedPref.getInt("TrackDefaultFreq", 0);
-        startTracking(trackDefaultFreq > 0 ? trackDefaultFreq : 30);*/
+        startTracking(trackDefaultFreq > 0 ? trackDefaultFreq : 30);
     }
 
     public void startOrderTracking() {
-        /*SharedPreferences sharedPref = getSharedPreferences(getString(R.string.app_name), Context.MODE_PRIVATE);
+        SharedPreferences sharedPref = getSharedPreferences(getString(R.string.app_name), Context.MODE_PRIVATE);
         Integer trackOrderFreq = sharedPref.getInt("TrackOrderFreq", 0);
-        startTracking(trackOrderFreq > 0 ? trackOrderFreq : 10);*/
+        startTracking(trackOrderFreq > 0 ? trackOrderFreq : 10);
     }
 
     public void addOrders(String ordernumber, String deliverytime, boolean isam, boolean yettopick) {

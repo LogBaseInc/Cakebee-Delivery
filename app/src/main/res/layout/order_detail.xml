@@ -16,8 +16,8 @@
         <Button
             android:id="@+id/backbtn"
             android:gravity="left"
-            android:layout_width="22dp"
-            android:layout_height="22dp"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
             android:layout_marginLeft="5dp"
             android:background="@drawable/backarrow"
             android:layout_gravity="center_vertical"
@@ -40,8 +40,9 @@
             android:layout_below="@+id/title"
             android:onClick="changeDeviceId"
             android:gravity="right"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_marginRight="10dp"
             android:background="@drawable/settings"
             android:layout_gravity="center_vertical" />
     </LinearLayout>
@@ -67,7 +68,7 @@
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:paddingTop="10dp">
+                    android:paddingTop="5dp">
 
                     <TextView
                         android:layout_width="0dp"
@@ -160,7 +161,8 @@
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:paddingTop="10dp">
+                    android:paddingTop="10dp"
+                    android:paddingBottom="5dp">
 
                     <TextView
                         android:layout_width="0dp"
@@ -200,7 +202,7 @@
                     android:layout_height="fill_parent"
                     android:layout_alignParentRight="true"
                     android:layout_alignParentEnd="true"
-                    android:paddingTop="10dp"
+                    android:paddingTop="5dp"
                     android:textStyle="bold"
                     android:text="Items"
                     android:textSize="14sp">
@@ -213,6 +215,7 @@
                     android:layout_alignParentRight="true"
                     android:layout_alignParentEnd="true"
                     android:paddingTop="10dp"
+                    android:paddingBottom="5dp"
                     android:textColor="#000000"
                     android:textSize="13sp">
                 </TextView>
@@ -237,7 +240,7 @@
                     android:layout_height="fill_parent"
                     android:layout_alignParentRight="true"
                     android:layout_alignParentEnd="true"
-                    android:paddingTop="10dp"
+                    android:paddingTop="5dp"
                     android:textStyle="bold"
                     android:text="Notes"
                     android:textSize="14sp">
@@ -250,6 +253,7 @@
                     android:layout_alignParentRight="true"
                     android:layout_alignParentEnd="true"
                     android:paddingTop="10dp"
+                    android:paddingBottom="5dp"
                     android:textColor="#000000"
                     android:textSize="13sp">
                 </TextView>
