@@ -14,6 +14,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -118,22 +119,6 @@ public class OrderDetailActivity extends Activity implements ConnectionCallbacks
                 .setNegativeButton("No", dialogClickListener).show();
     }
 
-    public void pickupConfirmed() {
-        mDialog.StartProcessDialog();
-
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-        String currentdateandtime = sdf.format(new java.util.Date());
-
-        Firebase myFirebaseRef = new Firebase(getString(R.string.friebaseurl)+"accounts/"+accountID+"/orders/"+deviceID+"/"+currentDate+"/"+orderdetail.Id+"/Pickedon");
-        myFirebaseRef.setValue(currentdateandtime);
-
-        sendActivity("PICKEDUP");
-
-        getlocation(deviceID, currentDate, "Pickedat");
-
-        startTracking(deviceID);
-    }
-
     public void delivered(View view) {
         DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
@@ -155,21 +140,6 @@ public class OrderDetailActivity extends Activity implements ConnectionCallbacks
                 .setNegativeButton("No", dialogClickListener).show();
     }
 
-    public void DeliverdConfirmed() {
-        mDialog.StartProcessDialog();
-
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-        String currentdateandtime = sdf.format(new java.util.Date());
-
-        Firebase myFirebaseRef = new Firebase(getString(R.string.friebaseurl)+"accounts/"+accountID+"/orders/"+deviceID+"/"+currentDate+"/"+orderdetail.Id+"/Deliveredon");
-        myFirebaseRef.setValue(currentdateandtime);
-
-        sendActivity("DELIVERED");
-
-        getlocation(deviceID, currentDate, "Deliveredat");
-        cancelclicked(null);
-    }
-
     public void cancelclicked(View view) {
         Intent intent = new Intent(this, OrdersActivity.class);
         startActivity(intent);
@@ -186,7 +156,7 @@ public class OrderDetailActivity extends Activity implements ConnectionCallbacks
     }
 
     public void viewrouteclicked(View view) {
-        Uri gmmIntentUri = Uri.parse("geo:0,0?q="+orderdetail.Address);
+        Uri gmmIntentUri = Uri.parse("geo:0,0?q=" + orderdetail.Address);
         Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
         mapIntent.setPackage("com.google.android.apps.maps");
         startActivity(mapIntent);
@@ -220,7 +190,36 @@ public class OrderDetailActivity extends Activity implements ConnectionCallbacks
         //ShowToast("onConnectionFailed: ");
     }
 
+    private void pickupConfirmed() {
+        mDialog.StartProcessDialog();
 
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+        String currentdateandtime = sdf.format(new java.util.Date());
+
+        Firebase myFirebaseRef = new Firebase(getString(R.string.friebaseurl)+"accounts/"+accountID+"/orders/"+deviceID+"/"+currentDate+"/"+orderdetail.Id+"/Pickedon");
+        myFirebaseRef.setValue(currentdateandtime);
+
+        sendActivity("PICKEDUP");
+
+        getlocation(deviceID, currentDate, "Pickedat");
+
+        startTracking(deviceID);
+    }
+
+    private void DeliverdConfirmed() {
+        mDialog.StartProcessDialog();
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+        String currentdateandtime = sdf.format(new java.util.Date());
+
+        Firebase myFirebaseRef = new Firebase(getString(R.string.friebaseurl)+"accounts/"+accountID+"/orders/"+deviceID+"/"+currentDate+"/"+orderdetail.Id+"/Deliveredon");
+        myFirebaseRef.setValue(currentdateandtime);
+
+        sendActivity("DELIVERED");
+
+        getlocation(deviceID, currentDate, "Deliveredat");
+        cancelclicked(null);
+    }
 
     private void setGoogleApiClient() {
         mGoogleApiClient = new GoogleApiClient.Builder(this)
@@ -314,19 +313,30 @@ public class OrderDetailActivity extends Activity implements ConnectionCallbacks
                     }
 
                     if(itemdetails != "")
-                        itemdetails = itemdetails + "\n\n";
+                        itemdetails = itemdetails;
                 }
             }
             isItemPresent = isItemPresent || itemdetails != "";
             itemdetailslabel.setText(itemdetails);
         }
 
-        TextView itemslabel = (TextView)findViewById(R.id.itemslabel);
+        LinearLayout itemslayout = (LinearLayout)findViewById(R.id.itemslayout);
         if(isItemPresent) {
-            itemslabel.setVisibility(View.VISIBLE);
+            itemslayout.setVisibility(View.VISIBLE);
         }
         else {
-            itemslabel.setVisibility(View.GONE);
+            itemslayout.setVisibility(View.GONE);
+        }
+
+        TextView notesdetaillabel = (TextView)findViewById(R.id.notesdetaillabel);
+        LinearLayout noteslayout = (LinearLayout)findViewById(R.id.noteslayout);
+
+        if(orderdetail.Notes != null && orderdetail.Notes != "") {
+            notesdetaillabel.setText(orderdetail.Notes);
+            noteslayout.setVisibility(View.VISIBLE);
+        }
+        else {
+            noteslayout.setVisibility(View.GONE);
         }
 
         Button acceptbtn = (Button)findViewById(R.id.acceptbtn);
@@ -424,7 +434,6 @@ public class OrderDetailActivity extends Activity implements ConnectionCallbacks
             }
         }
     }
-
 
     // HTTP POST request
     private void excutePost(JSONObject order) throws Exception

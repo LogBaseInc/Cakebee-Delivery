@@ -9,11 +9,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.ListView;
 import android.view.View;
 import android.widget.Toast;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.firebase.client.Firebase;
 import com.firebase.client.ValueEventListener;
@@ -29,6 +29,8 @@ import java.util.List;
 import java.util.ArrayList;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
+import java.util.UUID;
+import android.widget.CompoundButton;
 
 public class OrdersActivity extends ListActivity {
     List<OrderDetails> orderDetaillist;
@@ -36,6 +38,9 @@ public class OrdersActivity extends ListActivity {
     String currentDate;
     LBProcessDialog mDialog = null;
     boolean doubleBackToExitPressedOnce = false;
+    String deviceID;
+    String accountID;
+    String accountname;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,23 +51,108 @@ public class OrdersActivity extends ListActivity {
         mDialog = new LBProcessDialog(this);
     }
 
-    private boolean CheckLoggedIn() {
-        boolean isloggedin = true;
+    @Override
+    public void onResume()
+    {
+        super.onResume();
+        doubleBackToExitPressedOnce = false;
+        ((MyApp) context.getApplicationContext()).setCurrentActivity(this);
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+        currentDate = sdf.format(new java.util.Date());
+
+        TextView nolist = (TextView) findViewById(R.id.nolist);
+        nolist.setVisibility(View.GONE);
+
+        mDialog.StartProcessDialog();
+
+        Firebase.setAndroidContext(this);
+
         SharedPreferences sharedPref = getSharedPreferences(getString(R.string.app_name), Context.MODE_PRIVATE);
-        String loggedinDate = sharedPref.getString("loggedinDate", null);
-        if(loggedinDate == null || loggedinDate.contains(currentDate) == false) {
-            isloggedin = false;
+        deviceID = sharedPref.getString("deviceID", null);
+        accountID = sharedPref.getString("accountID", null);
+        accountname = sharedPref.getString("accountname", null);
+
+        initializeSwtich();
+        getOrders();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (doubleBackToExitPressedOnce) {
+            Intent intent = new Intent(Intent.ACTION_MAIN);
+            intent.addCategory(Intent.CATEGORY_HOME);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+            return;
         }
-        return isloggedin;
+        this.doubleBackToExitPressedOnce = true;
+        Toast.makeText(this, "Tap again to exit", Toast.LENGTH_SHORT).show();
+        new android.os.Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+
+                doubleBackToExitPressedOnce = false;
+            }
+        }, 2000);
+    }
+
+    public void changeDeviceId(View view) {
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.putExtra("ChangeDevice", "true");
+        startActivity(intent);
+    }
+
+    public void orderClicked(View view) {
+        View parentRow = (View) view.getParent();
+        ListView listView = (ListView) parentRow.getParent();
+        int position = listView.getPositionForView(parentRow);
+        OrderDetails orderDetail = orderDetaillist.get(position);
+        showOrderDetails(orderDetail);
+    }
+
+    private  void initializeSwtich(){
+        Firebase loggedinref = new Firebase(getString(R.string.friebaseurl)+"accounts/"+accountID+"/orders/"+deviceID+"/"+currentDate+"/Loggedin");
+        loggedinref.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                Switch toggle = (Switch)findViewById(R.id.logintoggle);
+                if (snapshot.getValue() != null && Boolean.parseBoolean(snapshot.getValue().toString()) == true)
+                    toggle.setChecked(true);
+                else
+                    toggle.setChecked(false);
+                setCheckChangedListener();
+            }
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+                System.out.println("The read failed: " + firebaseError.getMessage());
+            }
+        });
+    }
+
+    private void setCheckChangedListener() {
+        Switch toggle = (Switch)findViewById(R.id.logintoggle);
+        toggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+                String currentdateandtime = sdf.format(new java.util.Date());
+                String uniqueID = UUID.randomUUID().toString();
+                Firebase myFirebaseRef = new Firebase(getString(R.string.friebaseurl) + "accounts/" + accountID + "/orders/" + deviceID + "/" + currentDate + "/Activity/" + uniqueID);
+                myFirebaseRef.child("Date").setValue(currentdateandtime);
+                myFirebaseRef.child("Login").setValue(isChecked);
+
+                myFirebaseRef = new Firebase(getString(R.string.friebaseurl) + "accounts/" + accountID + "/orders/" + deviceID + "/" + currentDate + "/Loggedin");
+                myFirebaseRef.setValue(isChecked);
+
+                Firebase accountdeviceref = new Firebase(getString(R.string.friebaseurl) + "accounts/" + accountID + "/devices/" + deviceID + "/activity");
+                accountdeviceref.child("date").setValue(currentdateandtime);
+                accountdeviceref.child("login").setValue(isChecked);
+            }
+        });
     }
 
     private void getOrders () {
         mDialog.StartProcessDialog();
-
-        SharedPreferences sharedPref = getSharedPreferences(getString(R.string.app_name), Context.MODE_PRIVATE);
-        String deviceID = sharedPref.getString("deviceID", null);
-        String accountID = sharedPref.getString("accountID", null);
-        String accountname = sharedPref.getString("accountname", null);
 
         TextView title = (TextView)findViewById(R.id.title);
         title.setText((accountname.substring(0, 1).toUpperCase() + accountname.substring(1)) + " Deliveries");
@@ -101,7 +191,7 @@ public class OrdersActivity extends ListActivity {
                             Iterator<Entry<String, JsonNode>> nodeIterator = node.fields();
                             while (nodeIterator.hasNext()) {
                                 Entry<String, JsonNode> entry = (Entry<String, JsonNode>) nodeIterator.next();
-                                if (entry.getKey() != "LoggedOn" && entry.getKey() != "Loggedat") {
+                                if (entry.getKey() != "LoggedOn" && entry.getKey() != "Loggedat" && entry.getKey() != "Activity" && entry.getKey() != "Loggedin") {
                                     OrderDetails orderdet = mapper.convertValue(entry.getValue(), OrderDetails.class);
                                     if (IsOrderValid(orderdet)) {
                                         String[] timesplit = new String[0];
@@ -172,7 +262,7 @@ public class OrdersActivity extends ListActivity {
                                             if (timesplit.length >= 1)
                                                 ((MyApp) context.getApplicationContext()).addOrders(orderdet.Id, timesplit[1], isdeliveryam, false);
                                         } else {
-                                            if(orderdet.Acceptedon != null && orderdet.Acceptedon != "")
+                                            if (orderdet.Acceptedon != null && orderdet.Acceptedon != "")
                                                 orderdet.Status = "Yet to pick";
                                             else
                                                 orderdet.Status = "Yet to accept";
@@ -251,71 +341,11 @@ public class OrdersActivity extends ListActivity {
         nolist.setVisibility(View.VISIBLE);
     }
 
-    public static String upperCaseFirst(String value) {
+    private static String upperCaseFirst(String value) {
         value = value.toLowerCase();
         char[] array = value.toCharArray();
         array[0] = Character.toUpperCase(array[0]);
         return new String(array);
-    }
-
-    public void changeDeviceId(View view) {
-        Intent intent = new Intent(this, MainActivity.class);
-        intent.putExtra("ChangeDevice","true");
-        startActivity(intent);
-    }
-
-    public void orderClicked(View view) {
-        View parentRow = (View) view.getParent();
-        ListView listView = (ListView) parentRow.getParent();
-        int position = listView.getPositionForView(parentRow);
-        OrderDetails orderDetail = orderDetaillist.get(position);
-        showOrderDetails(orderDetail);
-    }
-
-    @Override
-    public void onResume()
-    {
-        super.onResume();
-        doubleBackToExitPressedOnce = false;
-        ((MyApp) context.getApplicationContext()).setCurrentActivity(this);
-
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
-        currentDate = sdf.format(new java.util.Date());
-
-        TextView nolist = (TextView) findViewById(R.id.nolist);
-        nolist.setVisibility(View.GONE);
-
-        mDialog.StartProcessDialog();
-
-        if(CheckLoggedIn()) {
-            Firebase.setAndroidContext(this);
-            getOrders();
-        }
-        else{
-            mDialog.StopProcessDialog();
-            Intent intent = new Intent(this, LoginActivity.class);
-            startActivity(intent);
-        }
-    }
-
-    @Override
-    public void onBackPressed() {
-        if (doubleBackToExitPressedOnce) {
-            Intent intent = new Intent(Intent.ACTION_MAIN);
-            intent.addCategory(Intent.CATEGORY_HOME);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(intent);
-            return;
-        }
-        this.doubleBackToExitPressedOnce = true;
-        Toast.makeText(this, "Tap again to exit", Toast.LENGTH_SHORT).show();
-        new android.os.Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-
-                doubleBackToExitPressedOnce = false;
-            }
-        }, 2000);
     }
 
     private void showOrderDetails(OrderDetails orderDetails) {

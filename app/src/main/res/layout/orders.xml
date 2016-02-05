@@ -28,18 +28,45 @@
             android:layout_below="@+id/title"
             android:onClick="changeDeviceId"
             android:gravity="right"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_marginRight="10dp"
             android:background="@drawable/settings"
             android:layout_gravity="center_vertical" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/loginLayout"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:layout_marginTop="10dp"
+        android:baselineAligned="false"
+        android:layout_below="@+id/titlelayout">
+
+        <android.widget.Switch
+            android:id="@+id/logintoggle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginStart="10dp"
+            android:text="Login"
+            android:textOff="Off"
+            android:textOn="On"
+            android:splitTrack="true"
+            android:showText="true"
+            android:switchPadding="10sp"
+            android:switchMinWidth="30sp"/>
     </LinearLayout>
 
     <ListView android:id="@id/android:list"
         android:layout_height="fill_parent"
         android:layout_width="fill_parent"
-        android:layout_below="@+id/titlelayout"
-        android:layout_marginTop="10dp"
+        android:layout_below="@+id/loginLayout"
         android:divider="@null"
+        android:layout_marginTop="5dp"
         android:dividerHeight="0dp"/>
 
     <TextView

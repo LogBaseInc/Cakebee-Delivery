@@ -172,47 +172,6 @@ public class TrackerIntentService extends IntentService implements
         Log.i(LOG_TAG, "Tracker service stopped.");
     }
 
-    private void setActivityRecoginitionService() {
-        final Context context = this;
-        activityGoogleApiClient = new GoogleApiClient.Builder(this)
-                    .addApi(ActivityRecognition.API)
-                    .addConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
-                        @Override
-                        public void onConnected(Bundle bundle) {
-                            Intent i = new Intent(context, ActivityRecognitionIntentService.class);
-                            PendingIntent mActivityRecongPendingIntent = PendingIntent.getService(context, 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
-                            ActivityRecognition.ActivityRecognitionApi.requestActivityUpdates(activityGoogleApiClient, 0, mActivityRecongPendingIntent);
-                        }
-
-                        @Override
-                        public void onConnectionSuspended(int i) {
-                        }
-                    })
-                    .addOnConnectionFailedListener(new GoogleApiClient.OnConnectionFailedListener() {
-                        @Override
-                        public void onConnectionFailed(ConnectionResult connectionResult) {
-                        }
-                    })
-                    .build();
-
-        activityGoogleApiClient.connect();
-
-        //Broadcast receiver
-        receiver  = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                //Add current time
-                currentActivity = intent.getStringExtra("activity");
-                confidence = intent.getExtras().getInt("confidence");
-            }
-        };
-
-        //Filter the Intent and register broadcast receiver
-        IntentFilter filter = new IntentFilter();
-        filter.addAction("ImActive");
-        registerReceiver(receiver, filter);
-    }
-
     @Override
     public void onConnected(Bundle connectionHint) {
         Log.i(LOG_TAG, "Google API connected");
@@ -272,6 +231,47 @@ public class TrackerIntentService extends IntentService implements
             lastLocation = location;
             lastLocationTime = new Date().getTime();
         }
+    }
+
+    private void setActivityRecoginitionService() {
+        final Context context = this;
+        activityGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addApi(ActivityRecognition.API)
+                .addConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
+                    @Override
+                    public void onConnected(Bundle bundle) {
+                        Intent i = new Intent(context, ActivityRecognitionIntentService.class);
+                        PendingIntent mActivityRecongPendingIntent = PendingIntent.getService(context, 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
+                        ActivityRecognition.ActivityRecognitionApi.requestActivityUpdates(activityGoogleApiClient, 0, mActivityRecongPendingIntent);
+                    }
+
+                    @Override
+                    public void onConnectionSuspended(int i) {
+                    }
+                })
+                .addOnConnectionFailedListener(new GoogleApiClient.OnConnectionFailedListener() {
+                    @Override
+                    public void onConnectionFailed(ConnectionResult connectionResult) {
+                    }
+                })
+                .build();
+
+        activityGoogleApiClient.connect();
+
+        //Broadcast receiver
+        receiver  = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                //Add current time
+                currentActivity = intent.getStringExtra("activity");
+                confidence = intent.getExtras().getInt("confidence");
+            }
+        };
+
+        //Filter the Intent and register broadcast receiver
+        IntentFilter filter = new IntentFilter();
+        filter.addAction("ImActive");
+        registerReceiver(receiver, filter);
     }
 
     private double getSpeedBasedonActivity(double locspeed) {

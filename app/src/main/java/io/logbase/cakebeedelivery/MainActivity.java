@@ -56,59 +56,7 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
         sharedPref = getSharedPreferences(getString(R.string.app_name), Context.MODE_PRIVATE);
 
         Firebase.setAndroidContext(this);
-
-        Spinner alerttypespinner = (Spinner)findViewById(R.id.alerttype);
-        String[] items = new String[]{"Ring tone", "Notification"};
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, items);
-        alerttypespinner.setAdapter(adapter);
-        alerttypespinner.setOnItemSelectedListener(this);
-
-        Spinner idleTrackTime = (Spinner)findViewById(R.id.idleTrackTime);
-        ArrayAdapter<String> idleTrackadapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, idleTrackitems);
-        idleTrackTime.setAdapter(idleTrackadapter);
-        idleTrackTime.setOnItemSelectedListener(this);
-
-        Button savebutton = (Button)findViewById(R.id.savebutton);
-        savebutton.getBackground().setColorFilter(0xFF00b5ad, PorterDuff.Mode.MULTIPLY);
-
-        Button savebutton1 = (Button)findViewById(R.id.savebutton1);
-        savebutton1.getBackground().setColorFilter(0xFF00b5ad, PorterDuff.Mode.MULTIPLY);
-
-        String deviceID = sharedPref.getString("deviceID", null);
-        String accountID = sharedPref.getString("accountID", null);
-
-        LinearLayout editlayout = (LinearLayout)findViewById(R.id.editlayout);
-        LinearLayout newlayout = (LinearLayout)findViewById(R.id.newlayout);
-
-        if(accountID != null && deviceID != null) {
-            newlayout.setVisibility(View.GONE);
-            editlayout.setVisibility(View.VISIBLE);
-
-            String username = sharedPref.getString("username", null);
-            String accountname = sharedPref.getString("accountname", null);
-
-            EditText usernametext = (EditText)findViewById(R.id.editusername);
-            EditText usernametext1 = (EditText)findViewById(R.id.username);
-            usernametext.setText(username);
-            usernametext1.setText(username);
-
-            EditText accountnametext = (EditText)findViewById(R.id.editaccountname);
-            EditText accountnametext1 = (EditText)findViewById(R.id.accountname);
-            accountnametext.setText(accountname);
-            accountnametext1.setText(accountname);
-
-            OrderAdded(accountID, deviceID);
-
-            Bundle b = getIntent().getExtras();
-            if(b == null || (b.getString("ChangeDevice") == null)) {
-                Intent intent = new Intent(this, LoginActivity.class);
-                startActivity(intent);
-            }
-        } else {
-            newlayout.setVisibility(View.VISIBLE);
-            editlayout.setVisibility(View.GONE);
-        }
-
+        initialize();
         registerAlarm(this);
     }
 
@@ -137,26 +85,6 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
         idleTrackTime.setSelection(indexOfidleTrackTime);
 
         setDeliveryTrackTimeArray(trackDefaultFreq);
-    }
-
-    public void setDeliveryTrackTimeArray(int trackDefaultFreq) {
-        deliveryTrackitems = new String[]{"3", "5", "10"};
-        if(trackDefaultFreq == 3) {
-            deliveryTrackitems = new String[]{"3"};
-        }
-        else if(trackDefaultFreq == 5) {
-            deliveryTrackitems = new String[]{"3", "5"};
-        }
-
-        Spinner deliveryTrackTime = (Spinner)findViewById(R.id.deliveryTrackTime);
-        ArrayAdapter<String> deliveryTrackadapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, deliveryTrackitems);
-        deliveryTrackTime.setAdapter(deliveryTrackadapter);
-        deliveryTrackTime.setOnItemSelectedListener(this);
-
-        trackOrderFreq = sharedPref.getInt("TrackOrderFreq", 0);
-        trackOrderFreq = trackOrderFreq > 0 ? trackOrderFreq : 10;
-        int indexOfdeiveryTrackTime = Arrays.asList(deliveryTrackitems).indexOf(trackOrderFreq.toString());
-        deliveryTrackTime.setSelection(indexOfdeiveryTrackTime >=0 ? indexOfdeiveryTrackTime : (deliveryTrackitems.length -1));
     }
 
     @Override
@@ -211,6 +139,81 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
         }
     }
 
+    private void initialize() {
+        Spinner alerttypespinner = (Spinner)findViewById(R.id.alerttype);
+        String[] items = new String[]{"Ring tone", "Notification"};
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, items);
+        alerttypespinner.setAdapter(adapter);
+        alerttypespinner.setOnItemSelectedListener(this);
+
+        Spinner idleTrackTime = (Spinner)findViewById(R.id.idleTrackTime);
+        ArrayAdapter<String> idleTrackadapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, idleTrackitems);
+        idleTrackTime.setAdapter(idleTrackadapter);
+        idleTrackTime.setOnItemSelectedListener(this);
+
+        Button savebutton = (Button)findViewById(R.id.savebutton);
+        savebutton.getBackground().setColorFilter(0xFF00b5ad, PorterDuff.Mode.MULTIPLY);
+
+        Button savebutton1 = (Button)findViewById(R.id.savebutton1);
+        savebutton1.getBackground().setColorFilter(0xFF00b5ad, PorterDuff.Mode.MULTIPLY);
+
+        String deviceID = sharedPref.getString("deviceID", null);
+        String accountID = sharedPref.getString("accountID", null);
+
+        LinearLayout editlayout = (LinearLayout)findViewById(R.id.editlayout);
+        LinearLayout newlayout = (LinearLayout)findViewById(R.id.newlayout);
+
+        if(accountID != null && deviceID != null) {
+            newlayout.setVisibility(View.GONE);
+            editlayout.setVisibility(View.VISIBLE);
+
+            String username = sharedPref.getString("username", null);
+            String accountname = sharedPref.getString("accountname", null);
+
+            EditText usernametext = (EditText)findViewById(R.id.editusername);
+            EditText usernametext1 = (EditText)findViewById(R.id.username);
+            usernametext.setText(username);
+            usernametext1.setText(username);
+
+            EditText accountnametext = (EditText)findViewById(R.id.editaccountname);
+            EditText accountnametext1 = (EditText)findViewById(R.id.accountname);
+            accountnametext.setText(accountname);
+            accountnametext1.setText(accountname);
+
+            OrderAdded(accountID, deviceID);
+
+            Bundle b = getIntent().getExtras();
+            if(b == null || (b.getString("ChangeDevice") == null)) {
+                Intent intent = new Intent(this, OrdersActivity.class);
+                startActivity(intent);
+            }
+        } else {
+            newlayout.setVisibility(View.VISIBLE);
+            editlayout.setVisibility(View.GONE);
+        }
+    }
+
+
+    private void setDeliveryTrackTimeArray(int trackDefaultFreq) {
+        deliveryTrackitems = new String[]{"3", "5", "10"};
+        if(trackDefaultFreq == 3) {
+            deliveryTrackitems = new String[]{"3"};
+        }
+        else if(trackDefaultFreq == 5) {
+            deliveryTrackitems = new String[]{"3", "5"};
+        }
+
+        Spinner deliveryTrackTime = (Spinner)findViewById(R.id.deliveryTrackTime);
+        ArrayAdapter<String> deliveryTrackadapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, deliveryTrackitems);
+        deliveryTrackTime.setAdapter(deliveryTrackadapter);
+        deliveryTrackTime.setOnItemSelectedListener(this);
+
+        trackOrderFreq = sharedPref.getInt("TrackOrderFreq", 0);
+        trackOrderFreq = trackOrderFreq > 0 ? trackOrderFreq : 10;
+        int indexOfdeiveryTrackTime = Arrays.asList(deliveryTrackitems).indexOf(trackOrderFreq.toString());
+        deliveryTrackTime.setSelection(indexOfdeiveryTrackTime >=0 ? indexOfdeiveryTrackTime : (deliveryTrackitems.length -1));
+    }
+
     private void CheckDeviceId(String actname, String username) {
         final String accountname = actname.toLowerCase().trim();
         username = username.toLowerCase().trim();
@@ -245,7 +248,7 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
             @Override
             public void onDataChange(DataSnapshot snapshot) {
                 mDialog.StopProcessDialog();
-                GoToLogin(snapshot.getValue().toString(), deviceId);
+                GoToOrders(snapshot.getValue().toString(), deviceId);
             }
 
             @Override
@@ -262,7 +265,7 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
         toast.show();
     }
 
-    private void GoToLogin(String accountID, String deviceID) {
+    private void GoToOrders(String accountID, String deviceID) {
         EditText accountnameText = (EditText)findViewById(R.id.accountname);
         String accountname = accountnameText.getText().toString();
 
@@ -288,7 +291,7 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
 
         OrderAdded(accountID, deviceID);
 
-        Intent intent = new Intent(this, LoginActivity.class);
+        Intent intent = new Intent(this, OrdersActivity.class);
         startActivity(intent);
     }
 
@@ -351,7 +354,7 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
         ((MyApp) context.getApplicationContext()).Notify("New order has been assigned");
     }
 
-    public static void registerAlarm(Context context) {
+    private static void registerAlarm(Context context) {
         AlarmManager alarmManager=(AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(context, AlarmReceiver.class);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, 0);

@@ -41,6 +41,7 @@ public class MyApp extends Application {
     Context context;
     boolean isstopinprogress = false;
     Loggly loggly;
+    private Activity mCurrentActivity = null;
 
     public void AddTrackingLog(String log) {
         //InitializeLoggly();
@@ -63,15 +64,15 @@ public class MyApp extends Application {
     }
 
     public void startDefaultTracking(){
-        SharedPreferences sharedPref = getSharedPreferences(getString(R.string.app_name), Context.MODE_PRIVATE);
+        /*SharedPreferences sharedPref = getSharedPreferences(getString(R.string.app_name), Context.MODE_PRIVATE);
         Integer trackDefaultFreq = sharedPref.getInt("TrackDefaultFreq", 0);
-        startTracking(trackDefaultFreq > 0 ? trackDefaultFreq : 30);
+        startTracking(trackDefaultFreq > 0 ? trackDefaultFreq : 30);*/
     }
 
     public void startOrderTracking() {
-        SharedPreferences sharedPref = getSharedPreferences(getString(R.string.app_name), Context.MODE_PRIVATE);
+        /*SharedPreferences sharedPref = getSharedPreferences(getString(R.string.app_name), Context.MODE_PRIVATE);
         Integer trackOrderFreq = sharedPref.getInt("TrackOrderFreq", 0);
-        startTracking(trackOrderFreq > 0 ? trackOrderFreq : 10);
+        startTracking(trackOrderFreq > 0 ? trackOrderFreq : 10);*/
     }
 
     public void addOrders(String ordernumber, String deliverytime, boolean isam, boolean yettopick) {
@@ -163,6 +164,27 @@ public class MyApp extends Application {
         }
     }
 
+    public Activity getCurrentActivity(){
+        return mCurrentActivity;
+    }
+
+    public void setCurrentActivity(Activity mCurrentActivity){
+        this.mCurrentActivity = mCurrentActivity;
+    }
+
+    public  boolean isInternetAvailable() {
+        ConnectivityManager cm = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
+        return cm.getActiveNetworkInfo() != null;
+    }
+
+    public boolean isGPSEnabled() {
+        LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+        if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER))
+            return true;
+        else
+            return false;
+    }
+
     private void startTracking(Integer frequency) {
         SharedPreferences sharedPref = getSharedPreferences(getString(R.string.app_name), Context.MODE_PRIVATE);
         deviceID = sharedPref.getString("deviceID", null);
@@ -219,27 +241,6 @@ public class MyApp extends Application {
     private void ShowToast(String message) {
         Toast toast = Toast.makeText(context, message, Toast.LENGTH_SHORT);
         toast.show();
-    }
-
-    private Activity mCurrentActivity = null;
-    public Activity getCurrentActivity(){
-        return mCurrentActivity;
-    }
-    public void setCurrentActivity(Activity mCurrentActivity){
-        this.mCurrentActivity = mCurrentActivity;
-    }
-
-    public  boolean isInternetAvailable() {
-        ConnectivityManager cm = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
-        return cm.getActiveNetworkInfo() != null;
-    }
-
-    public boolean isGPSEnabled() {
-        LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-        if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER))
-            return true;
-        else
-            return false;
     }
 
     public class StatusReceiver extends BroadcastReceiver {

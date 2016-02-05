@@ -53,146 +53,208 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingLeft="10dp">
+            android:layout_marginTop="6dp">
             <LinearLayout
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:paddingTop="10dp">
-
-                <TextView
-                    android:layout_width="0dp"
+                android:orientation="vertical"
+                android:layout_marginLeft="6dip"
+                android:layout_marginRight="6dip"
+                android:layout_marginBottom="6dip"
+                android:padding="5dp"
+                android:background="@drawable/layout_corner">
+                <LinearLayout
+                    android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="0.35"
-                    android:textSize="13sp"
-                    android:text="@string/time" />
+                    android:orientation="horizontal"
+                    android:paddingTop="10dp">
 
-                <TextView
-                    android:id="@+id/timelabel"
-                    android:layout_width="0dp"
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.35"
+                        android:textSize="13sp"
+                        android:text="@string/time" />
+
+                    <TextView
+                        android:id="@+id/timelabel"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.65"
+                        android:ems="10"
+                        android:textSize="13sp"
+                        android:textColor="#000000" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="0.65"
-                    android:ems="10"
-                    android:textSize="13sp"
-                    android:textColor="#000000" />
+                    android:orientation="horizontal"
+                    android:paddingTop="10dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.35"
+                        android:text="@string/name"
+                        android:textSize="13sp" />
+
+                    <TextView
+                        android:id="@+id/namelabel"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.65"
+                        android:ems="10"
+                        android:textSize="13sp"
+                        android:textColor="#000000"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:paddingTop="10dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.35"
+                        android:textSize="13sp"
+                        android:text="@string/address" />
+
+                    <TextView
+                        android:id="@+id/addresslabel"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.65"
+                        android:ems="10"
+                        android:textSize="13sp"
+                        android:textColor="#000000"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:paddingTop="10dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.35"
+                        android:text="@string/mobile"
+                        android:textSize="13sp"/>
+
+                    <TextView
+                        android:id="@+id/phonelabel"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.65"
+                        android:ems="10"
+                        android:autoLink="phone"
+                        android:textColor="#000000"
+                        android:textSize="13sp"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:paddingTop="10dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_weight="0.35"
+                        android:text="@string/amount"
+                        android:textSize="13sp"/>
+
+                    <TextView
+                        android:id="@+id/amountlabel"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.65"
+                        android:ems="10"
+                        android:text="Rs 0"
+                        android:textColor="#000000"
+                        android:textSize="13sp"/>
+                </LinearLayout>
+
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/itemslayout"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:paddingTop="10dp">
+                android:orientation="vertical"
+                android:layout_marginLeft="6dip"
+                android:layout_marginRight="6dip"
+                android:layout_marginBottom="6dip"
+                android:padding="5dp"
+                android:visibility="gone"
+                android:background="@drawable/layout_corner">
+                <TextView xmlns:android="http://schemas.android.com/apk/res/android"
+                    android:id="@+id/itemslabel"
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignParentEnd="true"
+                    android:paddingTop="10dp"
+                    android:textStyle="bold"
+                    android:text="Items"
+                    android:textSize="14sp">
+                </TextView>
 
-                <TextView
-                    android:layout_width="0dp"
+                <TextView xmlns:android="http://schemas.android.com/apk/res/android"
+                    android:id="@+id/itemdetailslabel"
+                    android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="0.35"
-                    android:text="@string/name"
-                    android:textSize="13sp" />
-
-                <TextView
-                    android:id="@+id/namelabel"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="0.65"
-                    android:ems="10"
-                    android:textSize="13sp"
-                    android:textColor="#000000"/>
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:paddingTop="10dp">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="0.35"
-                    android:textSize="13sp"
-                    android:text="@string/address" />
-
-                <TextView
-                    android:id="@+id/addresslabel"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="0.65"
-                    android:ems="10"
-                    android:textSize="13sp"
-                    android:textColor="#000000"/>
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:paddingTop="10dp">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="0.35"
-                    android:text="@string/mobile"
-                    android:textSize="13sp"/>
-
-                <TextView
-                    android:id="@+id/phonelabel"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="0.65"
-                    android:ems="10"
-                    android:autoLink="phone"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignParentEnd="true"
+                    android:paddingTop="10dp"
                     android:textColor="#000000"
-                    android:textSize="13sp"/>
+                    android:textSize="13sp">
+                </TextView>
+
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/noteslayout"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:paddingTop="10dp">
+                android:orientation="vertical"
+                android:layout_marginLeft="6dip"
+                android:layout_marginRight="6dip"
+                android:layout_marginBottom="6dip"
+                android:padding="5dp"
+                android:visibility="gone"
+                android:background="@drawable/layout_corner">
 
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:layout_weight="0.35"
-                    android:text="@string/amount"
-                    android:textSize="13sp"/>
+                <TextView xmlns:android="http://schemas.android.com/apk/res/android"
+                    android:id="@+id/noteslabel"
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignParentEnd="true"
+                    android:paddingTop="10dp"
+                    android:textStyle="bold"
+                    android:text="Notes"
+                    android:textSize="14sp">
+                </TextView>
 
-                <TextView
-                    android:id="@+id/amountlabel"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="0.65"
-                    android:ems="10"
-                    android:text="Rs 0"
+                <TextView xmlns:android="http://schemas.android.com/apk/res/android"
+                    android:id="@+id/notesdetaillabel"
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignParentEnd="true"
+                    android:paddingTop="10dp"
                     android:textColor="#000000"
-                    android:textSize="13sp"/>
-            </LinearLayout>
-            <TextView xmlns:android="http://schemas.android.com/apk/res/android"
-                android:id="@+id/itemslabel"
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
-                android:layout_alignParentRight="true"
-                android:layout_alignParentEnd="true"
-                android:paddingTop="10dp"
-                android:textStyle="bold"
-                android:text="Items"
-                android:textSize="13sp">
-            </TextView>
+                    android:textSize="13sp">
+                </TextView>
 
-            <TextView xmlns:android="http://schemas.android.com/apk/res/android"
-                android:id="@+id/itemdetailslabel"
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
-                android:layout_alignParentRight="true"
-                android:layout_alignParentEnd="true"
-                android:paddingTop="10dp"
-                android:textColor="#000000"
-                android:textSize="13sp">
-            </TextView>
+            </LinearLayout>
 
             <LinearLayout
                 android:layout_width="fill_parent"
