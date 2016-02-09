@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:id="@+id/titlelayout"
+        android:orientation="horizontal"
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="#00b5ad"
+        android:baselineAligned="false">
+        <Button
+            android:id="@+id/backbtn"
+            android:gravity="left"
+            android:layout_width="45dp"
+            android:layout_height="45dp"
+            android:layout_marginLeft="5dp"
+            android:background="@drawable/icon"
+            android:layout_gravity="center_vertical"/>
+
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.7"
+            android:gravity="center"
+            android:textSize="15sp"
+            android:textStyle = "bold"
+            android:text="Task"
+            android:textColor="#ffffff"
+            android:layout_gravity="center_vertical"/>
+
+        <Button
+            android:id="@+id/deviceidlabel"
+            android:layout_below="@+id/title"
+            android:onClick="changeDeviceId"
+            android:gravity="right"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginRight="10dp"
+            android:background="#00b5ad"
+            android:layout_gravity="center_vertical" />
+    </LinearLayout>
+
+    <EditText
+        android:id="@+id/notetext"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:singleLine="false"
+        android:lines="5"
+        android:layout_marginTop="30dp"
+        android:layout_marginLeft="10dip"
+        android:layout_marginRight="10dip"
+        android:hint="Notes ..."
+        android:textSize="13sp"/>
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingTop="10dp"
+        android:layout_below="@+id/notetext"
+        android:gravity="center">
+        <Button
+            android:id="@+id/starttrackingbtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ems="6"
+            android:text="Start Task"
+            android:textColor="#ffffff"
+            android:textSize="13sp"
+            android:textAllCaps="false"
+            android:onClick="startTask"/>
+
+        <Button
+            android:id="@+id/stoptrackingbtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ems="6"
+            android:text="Stop Task"
+            android:textColor="#ffffff"
+            android:textSize="13sp"
+            android:textAllCaps="false"
+            android:visibility="gone"
+            android:onClick="stopTask"/>
+
+        <Button
+            android:id="@+id/cancelbtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ems="6"
+            android:text="Cancel"
+            android:textColor="#ffffff"
+            android:textSize="13sp"
+            android:textAllCaps="false"
+            android:onClick="cancel"/>
+    </LinearLayout>
+
+</LinearLayout>

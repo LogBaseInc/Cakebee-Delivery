@@ -322,8 +322,6 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
                         orders.add(snapshot.getKey());
                         editor.putStringSet("OrderIds", orders);
                         editor.commit();
-
-                        NotifyNewOrder();
                     }
                 }
             }

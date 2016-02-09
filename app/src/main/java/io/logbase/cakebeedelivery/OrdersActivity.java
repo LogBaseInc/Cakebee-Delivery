@@ -4,11 +4,13 @@ package io.logbase.cakebeedelivery;
  * Created by logbase on 20/11/15.
  */
 
+import android.app.Dialog;
 import android.app.ListActivity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.view.Window;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.ListView;
@@ -41,6 +43,7 @@ public class OrdersActivity extends ListActivity {
     String deviceID;
     String accountID;
     String accountname;
+    Firebase weburlFirebaseRef = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,6 +76,7 @@ public class OrdersActivity extends ListActivity {
         accountID = sharedPref.getString("accountID", null);
         accountname = sharedPref.getString("accountname", null);
 
+        getWebhookUrl();
         initializeSwtich();
         getOrders();
     }
@@ -111,18 +115,24 @@ public class OrdersActivity extends ListActivity {
         showOrderDetails(orderDetail);
     }
 
+    public void addtask(View view) {
+        Intent intent = new Intent(this, TaskActivity.class);
+        startActivity(intent);
+    }
+
     private  void initializeSwtich(){
         Firebase loggedinref = new Firebase(getString(R.string.friebaseurl)+"accounts/"+accountID+"/orders/"+deviceID+"/"+currentDate+"/Loggedin");
         loggedinref.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot snapshot) {
-                Switch toggle = (Switch)findViewById(R.id.logintoggle);
+                Switch toggle = (Switch) findViewById(R.id.logintoggle);
                 if (snapshot.getValue() != null && Boolean.parseBoolean(snapshot.getValue().toString()) == true)
                     toggle.setChecked(true);
                 else
                     toggle.setChecked(false);
                 setCheckChangedListener();
             }
+
             @Override
             public void onCancelled(FirebaseError firebaseError) {
                 System.out.println("The read failed: " + firebaseError.getMessage());
@@ -278,9 +288,17 @@ public class OrdersActivity extends ListActivity {
                                     }
                                 }
                             }
+
+                            SharedPreferences sharedPref = getSharedPreferences(getString(R.string.app_name), Context.MODE_PRIVATE);
+                            SharedPreferences.Editor editor = sharedPref.edit();
+
                             if (pickedupordercount > 0) {
+                                editor.putBoolean("OrderTracking", true);
+                                editor.commit();
                                 startOrderTracking();
                             } else {
+                                editor.putBoolean("OrderTracking", false);
+                                editor.commit();
                                 startDefaultTracking();
                             }
 
@@ -360,5 +378,28 @@ public class OrdersActivity extends ListActivity {
         Intent intent = new Intent(this, OrderDetailActivity.class);
         intent.putExtra("Order",orderjson);
         startActivity(intent);
+    }
+
+    private void getWebhookUrl() {
+        if(weburlFirebaseRef == null) {
+            weburlFirebaseRef = new Firebase(getString(R.string.friebaseurl) + "accounts/" + accountID + "/settings/webhook/url");
+            weburlFirebaseRef.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot snapshot) {
+                    Object webhookurl = snapshot.getValue();
+                    System.out.println("webhookurl" + webhookurl);
+                    SharedPreferences sharedPref = getSharedPreferences(getString(R.string.app_name), Context.MODE_PRIVATE);
+                    SharedPreferences.Editor editor = sharedPref.edit();
+                    editor.putBoolean("WebhookEnabled", ((webhookurl != null && webhookurl != "") ? true : false));
+                    editor.putString("WebhookUrl", webhookurl != null ? webhookurl.toString() : "");
+                    editor.commit();
+                }
+
+                @Override
+                public void onCancelled(FirebaseError firebaseError) {
+                    System.out.println("The webhookurl read failed: " + firebaseError.getMessage());
+                }
+            });
+        }
     }
 }

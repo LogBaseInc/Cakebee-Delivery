@@ -412,6 +412,7 @@ public class OrderDetailActivity extends Activity implements ConnectionCallbacks
 
     private void sendActivity(String activity){
         boolean webhookEnabled =  sharedPref.getBoolean("WebhookEnabled", false);
+
         if(webhookEnabled == true) {
             String webhookUrl = sharedPref.getString("WebhookUrl", "");
             if(webhookUrl != null && webhookUrl != "") {
@@ -431,8 +432,10 @@ public class OrderDetailActivity extends Activity implements ConnectionCallbacks
 
                 } catch (JSONException e) {
                     e.printStackTrace();
+                    System.out.println("JSONException " + e.getMessage());
                 } catch (Exception e) {
                     e.printStackTrace();
+                    System.out.println("Exception " + e.getMessage());
                 }
             }
         }
@@ -475,6 +478,7 @@ public class OrderDetailActivity extends Activity implements ConnectionCallbacks
                             conn.connect();
 
                             responsecode = conn.getResponseCode();
+
                             if(responsecode == 200) {
                                 repeat = false;
                                 error = null;
