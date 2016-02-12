@@ -11,8 +11,8 @@ android {
         applicationId "io.logbase.cakebeedelivery"
         minSdkVersion 18
         targetSdkVersion 23
-        versionCode 10009
-        versionName "1.0.9"
+        versionCode 100011
+        versionName "1.1.1"
         multiDexEnabled true
     }
     buildTypes {

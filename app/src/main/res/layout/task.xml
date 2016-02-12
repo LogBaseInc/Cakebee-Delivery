@@ -34,14 +34,12 @@
             android:layout_gravity="center_vertical"/>
 
         <Button
-            android:id="@+id/deviceidlabel"
             android:layout_below="@+id/title"
-            android:onClick="changeDeviceId"
             android:gravity="right"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:layout_marginRight="10dp"
-            android:background="#00b5ad"
+            android:background="@android:color/transparent"
             android:layout_gravity="center_vertical" />
     </LinearLayout>
 

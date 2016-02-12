@@ -227,14 +227,20 @@ public class OrdersActivity extends ListActivity {
                                                     timesplit[1] = timesplit[1].replaceAll("am", "");
                                                     timesplit[1] = timesplit[1].replaceAll("pm", "");
                                                     if (Double.parseDouble(timesplit[1]) == 12)
-                                                        isdeliveryam = true;
+                                                        isdeliveryam = false;
                                                 } else if (timesplit[0].contains("pm")) {
                                                     ispm = true;
                                                     ispickupam = false;
+
+                                                    timesplit[0] = timesplit[0].replaceAll("am", "");
+                                                    timesplit[0] = timesplit[0].replaceAll("pm", "");
                                                     timesplit[1] = timesplit[1].replaceAll("am", "");
                                                     timesplit[1] = timesplit[1].replaceAll("pm", "");
+
                                                     if (Double.parseDouble(timesplit[1]) == 12)
-                                                        isdeliveryam = true;
+                                                        isdeliveryam = false;
+                                                    if(Double.parseDouble(timesplit[0]) == 12)
+                                                        ispm = false;
                                                 } else {
                                                     if (timesplit[1].indexOf("pm") >= 0 && Double.parseDouble(timesplit[0]) >= 1 && Double.parseDouble(timesplit[0]) < 12) {
                                                         timesplit[1] = timesplit[1].replaceAll("am", "");
@@ -243,7 +249,7 @@ public class OrdersActivity extends ListActivity {
                                                             ispm = true;
                                                             ispickupam = false;
                                                         } else {
-                                                            isdeliveryam = true;
+                                                            isdeliveryam = false;
                                                         }
                                                     }
                                                 }
@@ -387,7 +393,6 @@ public class OrdersActivity extends ListActivity {
                 @Override
                 public void onDataChange(DataSnapshot snapshot) {
                     Object webhookurl = snapshot.getValue();
-                    System.out.println("webhookurl" + webhookurl);
                     SharedPreferences sharedPref = getSharedPreferences(getString(R.string.app_name), Context.MODE_PRIVATE);
                     SharedPreferences.Editor editor = sharedPref.edit();
                     editor.putBoolean("WebhookEnabled", ((webhookurl != null && webhookurl != "") ? true : false));
