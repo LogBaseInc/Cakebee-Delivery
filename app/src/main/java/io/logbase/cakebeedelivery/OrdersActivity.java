@@ -4,13 +4,12 @@ package io.logbase.cakebeedelivery;
  * Created by logbase on 20/11/15.
  */
 
-import android.app.Dialog;
 import android.app.ListActivity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.view.Window;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.ListView;
@@ -33,6 +32,7 @@ import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.UUID;
 import android.widget.CompoundButton;
+import android.content.pm.PackageInfo;
 
 public class OrdersActivity extends ListActivity {
     List<OrderDetails> orderDetaillist;
@@ -67,7 +67,7 @@ public class OrdersActivity extends ListActivity {
         TextView nolist = (TextView) findViewById(R.id.nolist);
         nolist.setVisibility(View.GONE);
 
-        mDialog.StartProcessDialog();
+        //mDialog.StartProcessDialog();
 
         Firebase.setAndroidContext(this);
 
@@ -78,7 +78,7 @@ public class OrdersActivity extends ListActivity {
 
         getWebhookUrl();
         initializeSwtich();
-        getOrders();
+        setVersionNumber();
     }
 
     @Override
@@ -125,11 +125,15 @@ public class OrdersActivity extends ListActivity {
         loggedinref.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot snapshot) {
+                mDialog.StopProcessDialog();
                 Switch toggle = (Switch) findViewById(R.id.logintoggle);
-                if (snapshot.getValue() != null && Boolean.parseBoolean(snapshot.getValue().toString()) == true)
+                if (snapshot.getValue() != null && Boolean.parseBoolean(snapshot.getValue().toString()) == true) {
                     toggle.setChecked(true);
-                else
+                    getOrders();
+                } else {
                     toggle.setChecked(false);
+                    NoOrders();
+                }
                 setCheckChangedListener();
             }
 
@@ -154,6 +158,11 @@ public class OrdersActivity extends ListActivity {
                 myFirebaseRef = new Firebase(getString(R.string.friebaseurl) + "accounts/" + accountID + "/orders/" + deviceID + "/" + currentDate + "/Loggedin");
                 myFirebaseRef.setValue(isChecked);
 
+                if (isChecked == true) {
+                    getOrders();
+                } else {
+                    NoOrders();
+                }
                 Firebase accountdeviceref = new Firebase(getString(R.string.friebaseurl) + "accounts/" + accountID + "/devices/" + deviceID + "/activity");
                 accountdeviceref.child("date").setValue(currentdateandtime);
                 accountdeviceref.child("login").setValue(isChecked);
@@ -176,160 +185,166 @@ public class OrdersActivity extends ListActivity {
                 ((MyApp) context.getApplicationContext()).Clear(false);
 
                 orderDetaillist = new ArrayList<OrderDetails>();
-                Object orders = snapshot.getValue();
-                if (orders != null) {
-                    ListView listview = (ListView) findViewById(android.R.id.list);
-                    listview.setVisibility(View.VISIBLE);
-                    TextView nolist = (TextView) findViewById(R.id.nolist);
-                    nolist.setVisibility(View.GONE);
-                    int pickedupordercount = 0;
+                Switch toggle = (Switch) findViewById(R.id.logintoggle);
+                boolean isChecked = toggle.isChecked();
+                if (isChecked == true) {
+                    Object orders = snapshot.getValue();
+                    if (orders != null) {
+                        ListView listview = (ListView) findViewById(android.R.id.list);
+                        listview.setVisibility(View.VISIBLE);
+                        TextView nolist = (TextView) findViewById(R.id.nolist);
+                        nolist.setVisibility(View.GONE);
+                        int pickedupordercount = 0;
 
-                    String ordersString = orders.toString();
+                        String ordersString = orders.toString();
 
-                    ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
-                    try {
-                        ordersString = ow.writeValueAsString(orders);
-                    } catch (JsonProcessingException e) {
-                        e.printStackTrace();
-                    }
+                        ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+                        try {
+                            ordersString = ow.writeValueAsString(orders);
+                        } catch (JsonProcessingException e) {
+                            e.printStackTrace();
+                        }
 
-                    ObjectMapper mapper = new ObjectMapper();
-                    try {
+                        ObjectMapper mapper = new ObjectMapper();
+                        try {
 
-                        JsonNode node = mapper.readTree(ordersString);
-                        if (node != null) {
-                            Iterator<Entry<String, JsonNode>> nodeIterator = node.fields();
-                            while (nodeIterator.hasNext()) {
-                                Entry<String, JsonNode> entry = (Entry<String, JsonNode>) nodeIterator.next();
-                                if (entry.getKey() != "LoggedOn" && entry.getKey() != "Loggedat" && entry.getKey() != "Activity" && entry.getKey() != "Loggedin") {
-                                    OrderDetails orderdet = mapper.convertValue(entry.getValue(), OrderDetails.class);
-                                    if (IsOrderValid(orderdet)) {
-                                        String[] timesplit = new String[0];
-                                        boolean ispickupam = true;
-                                        boolean isdeliveryam = true;
+                            JsonNode node = mapper.readTree(ordersString);
+                            if (node != null) {
+                                Iterator<Entry<String, JsonNode>> nodeIterator = node.fields();
+                                while (nodeIterator.hasNext()) {
+                                    Entry<String, JsonNode> entry = (Entry<String, JsonNode>) nodeIterator.next();
+                                    if (entry.getKey() != "LoggedOn" && entry.getKey() != "Loggedat" && entry.getKey() != "Activity" && entry.getKey() != "Loggedin") {
+                                        OrderDetails orderdet = mapper.convertValue(entry.getValue(), OrderDetails.class);
+                                        if (IsOrderValid(orderdet)) {
+                                            String[] timesplit = new String[0];
+                                            boolean ispickupam = true;
+                                            boolean isdeliveryam = true;
 
-                                        if (!(orderdet.Time.contains("Mid"))) {
-                                            orderdet.Time = orderdet.Time.toLowerCase();
-                                            if (orderdet.Time.contains(":")) {
-                                                orderdet.Time = orderdet.Time.replaceAll(":", ".");
-                                            }
+                                            if (!(orderdet.Time.contains("Mid"))) {
+                                                orderdet.Time = orderdet.Time.toLowerCase();
+                                                if (orderdet.Time.contains(":")) {
+                                                    orderdet.Time = orderdet.Time.replaceAll(":", ".");
+                                                }
 
-                                            timesplit = orderdet.Time.split("-");
-                                            if (timesplit.length >= 2) {
-                                                timesplit[0] = timesplit[0].replaceAll(" ", "");
-                                                timesplit[1] = timesplit[1].replaceAll(" ", "");
+                                                timesplit = orderdet.Time.split("-");
+                                                if (timesplit.length >= 2) {
+                                                    timesplit[0] = timesplit[0].replaceAll(" ", "");
+                                                    timesplit[1] = timesplit[1].replaceAll(" ", "");
 
-                                                Boolean ispm = false;
-                                                isdeliveryam = !(timesplit[1].contains("pm"));
-                                                if (timesplit[0].contains("am")) {
-                                                    ispm = false;
-                                                    ispickupam = true;
-                                                    timesplit[1] = timesplit[1].replaceAll("am", "");
-                                                    timesplit[1] = timesplit[1].replaceAll("pm", "");
-                                                    if (Double.parseDouble(timesplit[1]) == 12)
-                                                        isdeliveryam = false;
-                                                } else if (timesplit[0].contains("pm")) {
-                                                    ispm = true;
-                                                    ispickupam = false;
+                                                    Boolean ispm = false;
+                                                    isdeliveryam = !(timesplit[1].contains("pm"));
+                                                    if (timesplit[0].contains("am")) {
+                                                        ispm = false;
+                                                        ispickupam = true;
+                                                        timesplit[1] = timesplit[1].replaceAll("am", "");
+                                                        timesplit[1] = timesplit[1].replaceAll("pm", "");
+                                                        if (Double.parseDouble(timesplit[1]) == 12)
+                                                            isdeliveryam = false;
+                                                    } else if (timesplit[0].contains("pm")) {
+                                                        ispm = true;
+                                                        ispickupam = false;
+
+                                                        timesplit[0] = timesplit[0].replaceAll("am", "");
+                                                        timesplit[0] = timesplit[0].replaceAll("pm", "");
+                                                        timesplit[1] = timesplit[1].replaceAll("am", "");
+                                                        timesplit[1] = timesplit[1].replaceAll("pm", "");
+
+                                                        if (Double.parseDouble(timesplit[1]) == 12)
+                                                            isdeliveryam = false;
+                                                        if (Double.parseDouble(timesplit[0]) == 12)
+                                                            ispm = false;
+                                                    } else {
+                                                        if (timesplit[1].indexOf("pm") >= 0 && Double.parseDouble(timesplit[0]) >= 1 && Double.parseDouble(timesplit[0]) < 12) {
+                                                            timesplit[1] = timesplit[1].replaceAll("am", "");
+                                                            timesplit[1] = timesplit[1].replaceAll("pm", "");
+                                                            if (Double.parseDouble(timesplit[1]) != 12) {
+                                                                ispm = true;
+                                                                ispickupam = false;
+                                                            } else {
+                                                                isdeliveryam = false;
+                                                            }
+                                                        }
+                                                    }
 
                                                     timesplit[0] = timesplit[0].replaceAll("am", "");
                                                     timesplit[0] = timesplit[0].replaceAll("pm", "");
-                                                    timesplit[1] = timesplit[1].replaceAll("am", "");
-                                                    timesplit[1] = timesplit[1].replaceAll("pm", "");
 
-                                                    if (Double.parseDouble(timesplit[1]) == 12)
-                                                        isdeliveryam = false;
-                                                    if(Double.parseDouble(timesplit[0]) == 12)
-                                                        ispm = false;
-                                                } else {
-                                                    if (timesplit[1].indexOf("pm") >= 0 && Double.parseDouble(timesplit[0]) >= 1 && Double.parseDouble(timesplit[0]) < 12) {
-                                                        timesplit[1] = timesplit[1].replaceAll("am", "");
-                                                        timesplit[1] = timesplit[1].replaceAll("pm", "");
-                                                        if (Double.parseDouble(timesplit[1]) != 12) {
-                                                            ispm = true;
-                                                            ispickupam = false;
-                                                        } else {
-                                                            isdeliveryam = false;
-                                                        }
-                                                    }
-                                                }
+                                                    orderdet.TimeSort = (Double.isNaN(Double.parseDouble(timesplit[0])) ? 24 : (ispm ? (Double.parseDouble(timesplit[0]) + 12) : Double.parseDouble(timesplit[0])));
+                                                } else
+                                                    orderdet.TimeSort = 0.0;
+                                            } else {
+                                                orderdet.TimeSort = 24.0;
+                                            }
 
-                                                timesplit[0] = timesplit[0].replaceAll("am", "");
-                                                timesplit[0] = timesplit[0].replaceAll("pm", "");
+                                            orderdet.Name = upperCaseFirst(orderdet.Name);
+                                            orderdet.Id = entry.getKey();
 
-                                                orderdet.TimeSort = (Double.isNaN(Double.parseDouble(timesplit[0])) ? 24 : (ispm ? (Double.parseDouble(timesplit[0]) + 12) : Double.parseDouble(timesplit[0])));
-                                            } else
-                                                orderdet.TimeSort = 0.0;
-                                        } else {
-                                            orderdet.TimeSort = 24.0;
+                                            if (orderdet.Deliveredon != null && orderdet.Deliveredon != "") {
+                                                orderdet.Status = "Delivered";
+                                                ((MyApp) context.getApplicationContext()).removeOrders(orderdet.Id, false);
+                                            } else if (orderdet.Pickedon != null && orderdet.Pickedon != "") {
+                                                orderdet.Status = "Picked up";
+                                                pickedupordercount = pickedupordercount + 1;
+
+                                                ((MyApp) context.getApplicationContext()).removeOrders(orderdet.Id, true);
+                                                if (timesplit.length >= 1)
+                                                    ((MyApp) context.getApplicationContext()).addOrders(orderdet.Id, timesplit[1], isdeliveryam, false);
+                                            } else {
+                                                if (orderdet.Acceptedon != null && orderdet.Acceptedon != "")
+                                                    orderdet.Status = "Yet to pick";
+                                                else
+                                                    orderdet.Status = "Yet to accept";
+
+                                                if (timesplit.length >= 1)
+                                                    ((MyApp) context.getApplicationContext()).addOrders(orderdet.Id, timesplit[0], ispickupam, true);
+
+                                                if (timesplit.length >= 2)
+                                                    ((MyApp) context.getApplicationContext()).addOrders(orderdet.Id, timesplit[1], isdeliveryam, false);
+                                            }
+
+                                            orderDetaillist.add(orderdet);
                                         }
-
-                                        orderdet.Name = upperCaseFirst(orderdet.Name);
-                                        orderdet.Id = entry.getKey();
-
-                                        if (orderdet.Deliveredon != null && orderdet.Deliveredon != "") {
-                                            orderdet.Status = "Delivered";
-                                            ((MyApp) context.getApplicationContext()).removeOrders(orderdet.Id, false);
-                                        } else if (orderdet.Pickedon != null && orderdet.Pickedon != "") {
-                                            orderdet.Status = "Picked up";
-                                            pickedupordercount = pickedupordercount + 1;
-
-                                            ((MyApp) context.getApplicationContext()).removeOrders(orderdet.Id, true);
-                                            if (timesplit.length >= 1)
-                                                ((MyApp) context.getApplicationContext()).addOrders(orderdet.Id, timesplit[1], isdeliveryam, false);
-                                        } else {
-                                            if (orderdet.Acceptedon != null && orderdet.Acceptedon != "")
-                                                orderdet.Status = "Yet to pick";
-                                            else
-                                                orderdet.Status = "Yet to accept";
-
-                                            if (timesplit.length >= 1)
-                                                ((MyApp) context.getApplicationContext()).addOrders(orderdet.Id, timesplit[0], ispickupam, true);
-
-                                            if (timesplit.length >= 2)
-                                                ((MyApp) context.getApplicationContext()).addOrders(orderdet.Id, timesplit[1], isdeliveryam, false);
-                                        }
-
-                                        orderDetaillist.add(orderdet);
                                     }
                                 }
+
+                                SharedPreferences sharedPref = getSharedPreferences(getString(R.string.app_name), Context.MODE_PRIVATE);
+                                SharedPreferences.Editor editor = sharedPref.edit();
+
+                                if (pickedupordercount > 0) {
+                                    editor.putBoolean("OrderTracking", true);
+                                    editor.commit();
+                                    startOrderTracking();
+                                } else {
+                                    editor.putBoolean("OrderTracking", false);
+                                    editor.commit();
+                                    startDefaultTracking();
+                                }
+
+                                Collections.sort(orderDetaillist);
+
+                                OrderlistAdapter listAdapter = new OrderlistAdapter(context, orderDetaillist);
+                                setListAdapter(listAdapter);
                             }
 
-                            SharedPreferences sharedPref = getSharedPreferences(getString(R.string.app_name), Context.MODE_PRIVATE);
-                            SharedPreferences.Editor editor = sharedPref.edit();
-
-                            if (pickedupordercount > 0) {
-                                editor.putBoolean("OrderTracking", true);
-                                editor.commit();
-                                startOrderTracking();
-                            } else {
-                                editor.putBoolean("OrderTracking", false);
-                                editor.commit();
-                                startDefaultTracking();
-                            }
-
-                            Collections.sort(orderDetaillist);
-
-                            OrderlistAdapter listAdapter = new OrderlistAdapter(context, orderDetaillist);
-                            setListAdapter(listAdapter);
+                        } catch (IOException e) {
+                            mDialog.StopProcessDialog();
+                            e.printStackTrace();
                         }
-
-                    } catch (IOException e) {
-                        mDialog.StopProcessDialog();
-                        e.printStackTrace();
                     }
-                }
 
-                if (orderDetaillist.size() <= 0) {
+                    if (orderDetaillist.size() <= 0) {
+                        NoOrders();
+                    }
+
+                    mDialog.StopProcessDialog();
+
+                    SharedPreferences sharedPref = getSharedPreferences(getString(R.string.app_name), Context.MODE_PRIVATE);
+                    SharedPreferences.Editor editor = sharedPref.edit();
+                    editor.putString("ordercount", currentDate);
+                    editor.commit();
+                } else {
                     NoOrders();
                 }
-
-                mDialog.StopProcessDialog();
-
-                SharedPreferences sharedPref = getSharedPreferences(getString(R.string.app_name), Context.MODE_PRIVATE);
-                SharedPreferences.Editor editor = sharedPref.edit();
-                editor.putString("ordercount", currentDate);
-                editor.commit();
             }
 
             @Override
@@ -359,6 +374,7 @@ public class OrdersActivity extends ListActivity {
     }
 
     private void NoOrders() {
+        mDialog.StopProcessDialog();
         ListView listview = (ListView)findViewById(android.R.id.list);
         listview.setVisibility(View.GONE);
         TextView nolist = (TextView) findViewById(R.id.nolist);
@@ -405,6 +421,18 @@ public class OrdersActivity extends ListActivity {
                     System.out.println("The webhookurl read failed: " + firebaseError.getMessage());
                 }
             });
+        }
+    }
+
+    private void setVersionNumber() {
+        try {
+            PackageInfo info = this.getPackageManager().getPackageInfo("io.logbase.cakebeedelivery", 0);
+            Firebase myFirebaseRef = new Firebase(getString(R.string.friebaseurl)+"accounts/"+accountID+"/devices/"+deviceID+"/appversion");
+            System.out.println(getString(R.string.friebaseurl)+"accounts/"+accountID+"/devices/"+deviceID+"/appversion");
+            myFirebaseRef.setValue(info.versionName);
+            System.out.println("info.versionName " + info.versionName);
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
         }
     }
 }

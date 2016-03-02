@@ -312,8 +312,7 @@ public class OrderDetailActivity extends Activity implements ConnectionCallbacks
                         itemdetails = itemdetails + item.Description;
                     }
 
-                    if(itemdetails != "")
-                        itemdetails = itemdetails;
+                    itemdetails = itemdetails+ "\n";
                 }
             }
             isItemPresent = isItemPresent || itemdetails != "";

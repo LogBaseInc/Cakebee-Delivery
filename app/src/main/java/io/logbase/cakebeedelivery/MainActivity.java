@@ -2,6 +2,7 @@ package io.logbase.cakebeedelivery;
 
 import android.app.Activity;
 import android.content.BroadcastReceiver;
+import android.content.pm.PackageManager;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.view.Menu;
@@ -13,12 +14,14 @@ import android.content.SharedPreferences;
 import android.content.Context;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 import com.firebase.client.ChildEventListener;
 import com.firebase.client.Firebase;
 import com.firebase.client.ValueEventListener;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.FirebaseError;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Iterator;
@@ -34,13 +37,16 @@ import android.widget.AdapterView.OnItemSelectedListener;
 import android.app.AlarmManager;
 import java.util.Map;
 import java.util.Arrays;
+import android.content.pm.PackageInfo;
+import android.net.Uri;
+import android.content.ActivityNotFoundException;
 
 public class MainActivity extends Activity implements OnItemSelectedListener {
 
     public Context context;
     LBProcessDialog mDialog = null;
+    String versionName = "";
     String alerttype = "Ring tone";
-
     SharedPreferences sharedPref;
     Integer trackDefaultFreq;
     Integer trackOrderFreq;
@@ -64,6 +70,7 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
     public void onResume() {
         super.onResume();
         ((MyApp) context.getApplicationContext()).setCurrentActivity(this);
+        CheckUpdates();
 
         if(sharedPref.getString("alerttype", null) != null)
             alerttype = sharedPref.getString("alerttype", null);
@@ -85,6 +92,7 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
         idleTrackTime.setSelection(indexOfidleTrackTime);
 
         setDeliveryTrackTimeArray(trackDefaultFreq);
+
     }
 
     @Override
@@ -162,10 +170,12 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
 
         LinearLayout editlayout = (LinearLayout)findViewById(R.id.editlayout);
         LinearLayout newlayout = (LinearLayout)findViewById(R.id.newlayout);
+        LinearLayout versionnumberlayout = (LinearLayout)findViewById(R.id.versionnumberlayout);
 
         if(accountID != null && deviceID != null) {
             newlayout.setVisibility(View.GONE);
             editlayout.setVisibility(View.VISIBLE);
+            //versionnumberlayout.setVisibility(View.VISIBLE);
 
             String username = sharedPref.getString("username", null);
             String accountname = sharedPref.getString("accountname", null);
@@ -190,6 +200,7 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
         } else {
             newlayout.setVisibility(View.VISIBLE);
             editlayout.setVisibility(View.GONE);
+            //versionnumberlayout.setVisibility(View.GONE);
         }
     }
 
@@ -304,7 +315,8 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
             // Retrieve new posts as they are added to the database
             @Override
             public void onChildAdded(DataSnapshot snapshot, String previousChildKey) {
-                if (snapshot.getKey().toString().contains("Logged") == false) {
+                if (snapshot.getKey().toString().contains("Logged") == false &&
+                    snapshot.getKey().toString().contains("Activity") == false) {
                     ArrayList<String> orderlist;
                     SharedPreferences.Editor editor = sharedPref.edit();
                     Set orders = sharedPref.getStringSet("OrderIds", null);
@@ -356,7 +368,49 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
         AlarmManager alarmManager=(AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(context, AlarmReceiver.class);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
-        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP,System.currentTimeMillis(),(60000 * 10), pendingIntent); //10 mins
+        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), (60000 * 10), pendingIntent); //10 mins
+    }
+
+    private void CheckUpdates() {
+        int code = 0;
+        PackageInfo info = null;
+        try {
+            info = this.getPackageManager().getPackageInfo("io.logbase.cakebeedelivery", 0);
+            versionName = info.versionName;
+            code = info.versionCode;
+            TextView versionnumber = (TextView)findViewById(R.id.versionnumber);
+            versionnumber.setText("Version number: " +versionName);
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+        final int versioncode = code;
+        Firebase myFirebaseRef = new Firebase(getString(R.string.friebaseurl)+"/Config/StickAgent");
+        myFirebaseRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                if (snapshot.getValue() != null && snapshot.getValue() != "") {
+                    int latestcode = Integer.parseInt(snapshot.getValue().toString());
+                    if (latestcode > versioncode) {
+                        Uri uri = Uri.parse("market://details?id=io.logbase.cakebeedelivery");
+                        Intent myAppLinkToMarket = new Intent(Intent.ACTION_VIEW, uri);
+
+                        try {
+                            startActivity(myAppLinkToMarket);
+
+                        } catch (ActivityNotFoundException e) {
+
+                            //the device hasn't installed Google Play
+                            Toast.makeText(context, "You don't have Google Play installed", Toast.LENGTH_LONG).show();
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+                System.out.println("The config failed: " + firebaseError.getMessage());
+            }
+        });
     }
 
     public static class AlarmReceiver extends BroadcastReceiver
