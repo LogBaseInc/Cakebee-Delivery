@@ -428,9 +428,7 @@ public class OrdersActivity extends ListActivity {
         try {
             PackageInfo info = this.getPackageManager().getPackageInfo("io.logbase.cakebeedelivery", 0);
             Firebase myFirebaseRef = new Firebase(getString(R.string.friebaseurl)+"accounts/"+accountID+"/devices/"+deviceID+"/appversion");
-            System.out.println(getString(R.string.friebaseurl)+"accounts/"+accountID+"/devices/"+deviceID+"/appversion");
             myFirebaseRef.setValue(info.versionName);
-            System.out.println("info.versionName " + info.versionName);
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
         }
