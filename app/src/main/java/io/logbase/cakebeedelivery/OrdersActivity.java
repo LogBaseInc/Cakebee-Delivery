@@ -67,8 +67,6 @@ public class OrdersActivity extends ListActivity {
         TextView nolist = (TextView) findViewById(R.id.nolist);
         nolist.setVisibility(View.GONE);
 
-        //mDialog.StartProcessDialog();
-
         Firebase.setAndroidContext(this);
 
         SharedPreferences sharedPref = getSharedPreferences(getString(R.string.app_name), Context.MODE_PRIVATE);
@@ -279,9 +277,14 @@ public class OrdersActivity extends ListActivity {
                                             orderdet.Name = upperCaseFirst(orderdet.Name);
                                             orderdet.Id = entry.getKey();
 
-                                            if (orderdet.Deliveredon != null && orderdet.Deliveredon != "") {
+                                            if (orderdet.Cancelledon != null && orderdet.Cancelledon != "") {
+                                                orderdet.Status = "Cancelled";
+                                                ((MyApp) context.getApplicationContext()).removeOrders(orderdet.Id, false);
+                                                ((MyApp) context.getApplicationContext()).removeOrders(orderdet.Id, true);
+                                            } else if (orderdet.Deliveredon != null && orderdet.Deliveredon != "") {
                                                 orderdet.Status = "Delivered";
                                                 ((MyApp) context.getApplicationContext()).removeOrders(orderdet.Id, false);
+                                                ((MyApp) context.getApplicationContext()).removeOrders(orderdet.Id, true);
                                             } else if (orderdet.Pickedon != null && orderdet.Pickedon != "") {
                                                 orderdet.Status = "Picked up";
                                                 pickedupordercount = pickedupordercount + 1;
@@ -398,7 +401,7 @@ public class OrdersActivity extends ListActivity {
         }
 
         Intent intent = new Intent(this, OrderDetailActivity.class);
-        intent.putExtra("Order",orderjson);
+        intent.putExtra("Order", orderjson);
         startActivity(intent);
     }
 

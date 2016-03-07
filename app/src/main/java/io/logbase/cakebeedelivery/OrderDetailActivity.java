@@ -406,7 +406,8 @@ public class OrderDetailActivity extends Activity implements ConnectionCallbacks
             deliveredbtn.setVisibility(View.VISIBLE);
             viewroutebtn.setVisibility(View.VISIBLE);
         }
-        else if(orderdetail.Status == "Delivered") {
+        else if(orderdetail.Status == "Delivered" || orderdetail.Status == "Cancelled") {
+
             acceptbtn.setVisibility(View.GONE);
             pickupbtn.setVisibility(View.GONE);
             deliveredbtn.setVisibility(View.GONE);
@@ -428,7 +429,9 @@ public class OrderDetailActivity extends Activity implements ConnectionCallbacks
                 orderdetail = snapshot.getValue(OrderDetails.class);
                 if(orderdetail != null) {
                     orderdetail.Id = snapshot.getKey();
-                    if (orderdetail.Deliveredon != null && orderdetail.Deliveredon != "") {
+                    if (orderdetail.Cancelledon != null && orderdetail.Cancelledon != "") {
+                        orderdetail.Status = "Cancelled";
+                    } else if (orderdetail.Deliveredon != null && orderdetail.Deliveredon != "") {
                         orderdetail.Status = "Delivered";
                     } else if (orderdetail.Pickedon != null && orderdetail.Pickedon != "") {
                         orderdetail.Status = "Picked up";

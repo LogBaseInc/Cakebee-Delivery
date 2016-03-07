@@ -45,7 +45,10 @@ public class OrderlistAdapter extends ArrayAdapter<OrderDetails> {
     }
 
     private String getColorCode(OrderDetails orderDetail) {
-        if(orderDetail.Status == "Yet to pick") {
+        if(orderDetail.Status == "Cancelled") {
+            return "#a9a9a9";
+        }
+        else if(orderDetail.Status == "Yet to pick") {
             return "#7986CB";
         }
         else if(orderDetail.Status == "Picked up") {
