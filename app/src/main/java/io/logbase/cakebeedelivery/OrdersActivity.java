@@ -188,6 +188,8 @@ public class OrdersActivity extends ListActivity {
                 if (isChecked == true) {
                     Object orders = snapshot.getValue();
                     if (orders != null) {
+                        Boolean hasStartedOrder = false;
+
                         ListView listview = (ListView) findViewById(android.R.id.list);
                         listview.setVisibility(View.VISIBLE);
                         TextView nolist = (TextView) findViewById(R.id.nolist);
@@ -277,6 +279,10 @@ public class OrdersActivity extends ListActivity {
                                             orderdet.Name = upperCaseFirst(orderdet.Name);
                                             orderdet.Id = entry.getKey();
 
+                                            if(orderdet.Startedon != null && orderdet.Startedon != "") {
+                                                hasStartedOrder = true;
+                                            }
+
                                             if (orderdet.Cancelledon != null && orderdet.Cancelledon != "") {
                                                 orderdet.Status = "Cancelled";
                                                 ((MyApp) context.getApplicationContext()).removeOrders(orderdet.Id, false);
@@ -325,7 +331,7 @@ public class OrdersActivity extends ListActivity {
 
                                 Collections.sort(orderDetaillist);
 
-                                OrderlistAdapter listAdapter = new OrderlistAdapter(context, orderDetaillist);
+                                OrderlistAdapter listAdapter = new OrderlistAdapter(context, orderDetaillist, hasStartedOrder);
                                 setListAdapter(listAdapter);
                             }
 

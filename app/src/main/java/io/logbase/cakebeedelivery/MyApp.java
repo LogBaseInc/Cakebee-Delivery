@@ -42,6 +42,17 @@ public class MyApp extends Application {
     boolean isstopinprogress = false;
     Loggly loggly;
     private Activity mCurrentActivity = null;
+    private static Context mContext;
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        mContext = getApplicationContext();
+    }
+
+    public static Context getContext() {
+        return mContext;
+    }
 
     public void AddTrackingLog(String log) {
         //InitializeLoggly();
@@ -195,9 +206,16 @@ public class MyApp extends Application {
             return false;
     }
 
+    public void stopAndStartTracking(){
+        System.out.println("stopAndStartTracking");
+        updatefreq = 0;
+        startTracking(30);
+    }
+
     private void startTracking(Integer frequency) {
         SharedPreferences sharedPref = getSharedPreferences(getString(R.string.app_name), Context.MODE_PRIVATE);
         deviceID = sharedPref.getString("deviceID", null);
+        System.out.println("deviceID: " + deviceID);
         context = this;
         if(stick == null) {
             IntentFilter mStatusIntentFilter = new IntentFilter("STICK_MOBILE_BROADCAST");

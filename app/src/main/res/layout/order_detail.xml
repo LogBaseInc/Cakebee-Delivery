@@ -21,7 +21,7 @@
             android:layout_marginLeft="5dp"
             android:background="@drawable/backarrow"
             android:layout_gravity="center_vertical"
-            android:onClick="cancelclicked"/>
+            android:onClick="goback"/>
 
         <TextView
             android:id="@+id/title"
@@ -304,12 +304,24 @@
                     android:id="@+id/viewroutegtn"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:ems="7"
+                    android:ems="6"
                     android:text="@string/viewroute"
                     android:textColor="#ffffff"
                     android:textSize="15sp"
                     android:textAllCaps="false"
                     android:onClick="viewrouteclicked"/>
+
+                <Button
+                    android:id="@+id/cancelbtn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ems="5"
+                    android:text="Cancel"
+                    android:textColor="#ffffff"
+                    android:textSize="15sp"
+                    android:textAllCaps="false"
+                    android:onClick="cancelclicked"/>
+
             </LinearLayout>
 
             <LinearLayout

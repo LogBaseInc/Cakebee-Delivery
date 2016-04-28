@@ -133,11 +133,24 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
     public void saveDeviceID(View view) {
         mDialog.StartProcessDialog();
 
-        EditText accountnameText = (EditText)findViewById(R.id.accountname);
-        String accountname = accountnameText.getText().toString();
+        LinearLayout editlayout = (LinearLayout)findViewById(R.id.editlayout);
+        String accountname = null;
+        String username = null;
 
-        EditText usernameText = (EditText)findViewById(R.id.username);
-        String username = usernameText.getText().toString();
+        if(editlayout.getVisibility() == View.GONE) {
+            EditText accountnameText = (EditText) findViewById(R.id.accountname);
+            accountname = accountnameText.getText().toString();
+
+            EditText usernameText = (EditText) findViewById(R.id.username);
+            username = usernameText.getText().toString();
+        }
+        else {
+            EditText accountnameText = (EditText) findViewById(R.id.editaccountname);
+            accountname = accountnameText.getText().toString();
+
+            EditText usernameText = (EditText) findViewById(R.id.editusername);
+            username = usernameText.getText().toString();
+        }
 
         if((accountname != null) && (!accountname.equals("")) && (username != null) && (!username.equals(""))) {
             CheckDeviceId(accountname, username);
@@ -170,12 +183,10 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
 
         LinearLayout editlayout = (LinearLayout)findViewById(R.id.editlayout);
         LinearLayout newlayout = (LinearLayout)findViewById(R.id.newlayout);
-        LinearLayout versionnumberlayout = (LinearLayout)findViewById(R.id.versionnumberlayout);
 
         if(accountID != null && deviceID != null) {
             newlayout.setVisibility(View.GONE);
             editlayout.setVisibility(View.VISIBLE);
-            //versionnumberlayout.setVisibility(View.VISIBLE);
 
             String username = sharedPref.getString("username", null);
             String accountname = sharedPref.getString("accountname", null);
@@ -200,7 +211,6 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
         } else {
             newlayout.setVisibility(View.VISIBLE);
             editlayout.setVisibility(View.GONE);
-            //versionnumberlayout.setVisibility(View.GONE);
         }
     }
 
@@ -226,6 +236,8 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
     }
 
     private void CheckDeviceId(String actname, String username) {
+        System.out.println(actname+ ", "+ username);
+
         final String accountname = actname.toLowerCase().trim();
         username = username.toLowerCase().trim();
 
@@ -237,8 +249,11 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
             @Override
             public void onDataChange(DataSnapshot snapshot) {
                 savebutton.setEnabled(true);
-
                 if (snapshot.getValue() != null) {
+                    SharedPreferences.Editor editor = sharedPref.edit();
+                    editor.putString("deviceID", snapshot.getValue().toString());
+                    editor.commit();
+                    ((MyApp) context.getApplicationContext()).stopAndStartTracking();
                     GetAccountId(accountname, snapshot.getValue().toString());
                 } else {
                     ShowToast("Account name or User name is incorrect");
@@ -277,11 +292,24 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
     }
 
     private void GoToOrders(String accountID, String deviceID) {
-        EditText accountnameText = (EditText)findViewById(R.id.accountname);
-        String accountname = accountnameText.getText().toString();
+        String accountname = null;
+        String username = null;
 
-        EditText usernameText = (EditText)findViewById(R.id.username);
-        String username = usernameText.getText().toString();
+        LinearLayout editlayout = (LinearLayout)findViewById(R.id.editlayout);
+        if(editlayout.getVisibility() == View.GONE) {
+            EditText accountnameText = (EditText) findViewById(R.id.accountname);
+            accountname = accountnameText.getText().toString();
+
+            EditText usernameText = (EditText) findViewById(R.id.username);
+            username = usernameText.getText().toString();
+        }
+        else {
+            EditText accountnameText = (EditText) findViewById(R.id.editaccountname);
+            accountname = accountnameText.getText().toString();
+
+            EditText usernameText = (EditText) findViewById(R.id.editusername);
+            username = usernameText.getText().toString();
+        }
 
         SharedPreferences.Editor editor = sharedPref.edit();
         editor.putString("deviceID", deviceID);

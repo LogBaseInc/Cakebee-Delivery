@@ -30,6 +30,8 @@ public class OrderDetails implements Comparable {
     @JsonIgnoreProperties(ignoreUnknown = true)
     public String Pickedat;
     @JsonIgnoreProperties(ignoreUnknown = true)
+    public String Startedon;
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public String Deliveredon;
     @JsonIgnoreProperties(ignoreUnknown = true)
     public String Deliveredat;
