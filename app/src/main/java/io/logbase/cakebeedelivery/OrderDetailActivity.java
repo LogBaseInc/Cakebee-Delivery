@@ -228,6 +228,7 @@ public class OrderDetailActivity extends Activity implements ConnectionCallbacks
         getlocation(deviceID, currentDate, "Pickedat");
 
         startTracking(deviceID);
+        goback(null);
     }
 
     private void DeliverdConfirmed() {

@@ -279,10 +279,6 @@ public class OrdersActivity extends ListActivity {
                                             orderdet.Name = upperCaseFirst(orderdet.Name);
                                             orderdet.Id = entry.getKey();
 
-                                            if(orderdet.Startedon != null && orderdet.Startedon != "") {
-                                                hasStartedOrder = true;
-                                            }
-
                                             if (orderdet.Cancelledon != null && orderdet.Cancelledon != "") {
                                                 orderdet.Status = "Cancelled";
                                                 ((MyApp) context.getApplicationContext()).removeOrders(orderdet.Id, false);
@@ -292,6 +288,9 @@ public class OrdersActivity extends ListActivity {
                                                 ((MyApp) context.getApplicationContext()).removeOrders(orderdet.Id, false);
                                                 ((MyApp) context.getApplicationContext()).removeOrders(orderdet.Id, true);
                                             } else if (orderdet.Pickedon != null && orderdet.Pickedon != "") {
+                                                if(orderdet.Startedon != null && orderdet.Startedon != "") {
+                                                    hasStartedOrder = true;
+                                                }
                                                 orderdet.Status = "Picked up";
                                                 pickedupordercount = pickedupordercount + 1;
 
