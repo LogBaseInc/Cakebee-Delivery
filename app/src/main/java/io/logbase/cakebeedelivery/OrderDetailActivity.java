@@ -51,6 +51,7 @@ public class OrderDetailActivity extends Activity implements ConnectionCallbacks
     private String accountID;
     private String currentDate;
     SharedPreferences sharedPref;
+    boolean isStartedEnabled = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,6 +78,7 @@ public class OrderDetailActivity extends Activity implements ConnectionCallbacks
     public void onResume() {
         super.onResume();
         ((MyApp) context.getApplicationContext()).setCurrentActivity(this);
+        isStartedEnabled = sharedPref.getBoolean("startEnabled", false);
     }
 
     @Override
@@ -345,7 +347,9 @@ public class OrderDetailActivity extends Activity implements ConnectionCallbacks
         TextView textView = (TextView) findViewById(R.id.clock);
         textView.setText(lastupdate);
 
-        getOrderDetails();
+        //getOrderDetails();
+
+        setOrderDetails();
 
     }
 
@@ -417,18 +421,21 @@ public class OrderDetailActivity extends Activity implements ConnectionCallbacks
         viewroutebtn.setVisibility(View.GONE);
         cancelbtn.setVisibility(View.GONE);
 
-        if (orderdetail.Status == "Yet to accept") {
+        if(orderdetail.Status.equals("Yet to accept")) {
             acceptbtn.setVisibility(View.VISIBLE);
-        } else if (orderdetail.Status == "Picked up") {
-            if (orderdetail.Startedon != null && orderdetail.Startedon != "") {
+        }
+        else if(orderdetail.Status.equals("Yet to pick")) {
+            pickupbtn.setVisibility(View.VISIBLE);
+        }
+        else if (orderdetail.Status.equals("Picked up")) {
+            if(isStartedEnabled == false) {
+                deliveredbtn.setVisibility(View.VISIBLE);
+            }
+            else if(orderdetail.Startedon != null && orderdetail.Startedon != "") {
                 deliveredbtn.setVisibility(View.VISIBLE);
                 cancelbtn.setVisibility(View.VISIBLE);
             }
             viewroutebtn.setVisibility(View.VISIBLE);
-        } else if (orderdetail.Status == "Delivered" || orderdetail.Status == "Cancelled") {
-        } else {
-            pickupbtn.setVisibility(View.VISIBLE);
-            deliveredbtn.setVisibility(View.GONE);
         }
     }
 

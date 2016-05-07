@@ -44,6 +44,10 @@ public class OrdersActivity extends ListActivity {
     String accountID;
     String accountname;
     Firebase weburlFirebaseRef = null;
+    boolean isAcceptEnabled = false;
+    boolean isStartedEnabled = false;
+    boolean isPickupEnabled = false;
+    boolean isDeliveredEnabled = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,6 +77,8 @@ public class OrdersActivity extends ListActivity {
         deviceID = sharedPref.getString("deviceID", null);
         accountID = sharedPref.getString("accountID", null);
         accountname = sharedPref.getString("accountname", null);
+        isStartedEnabled = sharedPref.getBoolean("startEnabled", false);
+        isAcceptEnabled = sharedPref.getBoolean("acceptEnabled", false);
 
         getWebhookUrl();
         initializeSwtich();
@@ -298,10 +304,10 @@ public class OrdersActivity extends ListActivity {
                                                 if (timesplit.length >= 1)
                                                     ((MyApp) context.getApplicationContext()).addOrders(orderdet.Id, timesplit[1], isdeliveryam, false);
                                             } else {
-                                                if (orderdet.Acceptedon != null && orderdet.Acceptedon != "")
-                                                    orderdet.Status = "Yet to pick";
-                                                else
+                                                if (isAcceptEnabled == true && (orderdet.Acceptedon == null || orderdet.Acceptedon == ""))
                                                     orderdet.Status = "Yet to accept";
+                                                else
+                                                    orderdet.Status = "Yet to pick";
 
                                                 if (timesplit.length >= 1)
                                                     ((MyApp) context.getApplicationContext()).addOrders(orderdet.Id, timesplit[0], ispickupam, true);
@@ -330,7 +336,7 @@ public class OrdersActivity extends ListActivity {
 
                                 Collections.sort(orderDetaillist);
 
-                                OrderlistAdapter listAdapter = new OrderlistAdapter(context, orderDetaillist, hasStartedOrder);
+                                OrderlistAdapter listAdapter = new OrderlistAdapter(context, orderDetaillist, isStartedEnabled, hasStartedOrder);
                                 setListAdapter(listAdapter);
                             }
 

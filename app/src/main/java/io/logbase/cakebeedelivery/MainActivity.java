@@ -236,8 +236,6 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
     }
 
     private void CheckDeviceId(String actname, String username) {
-        System.out.println(actname+ ", "+ username);
-
         final String accountname = actname.toLowerCase().trim();
         username = username.toLowerCase().trim();
 
@@ -274,6 +272,7 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
             @Override
             public void onDataChange(DataSnapshot snapshot) {
                 mDialog.StopProcessDialog();
+                GetAppSettings(snapshot.getValue().toString());
                 GoToOrders(snapshot.getValue().toString(), deviceId);
             }
 
@@ -284,6 +283,28 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
             }
         });
     }
+
+    private void GetAppSettings(String accountid) {
+        Firebase myFirebaseRef = new Firebase(getString(R.string.friebaseurl)+"/accounts/"+accountid+"/settings/agentapp");
+        myFirebaseRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                mDialog.StopProcessDialog();
+
+                SharedPreferences.Editor editor = sharedPref.edit();
+                editor.putBoolean("acceptEnabled", Boolean.parseBoolean(snapshot.child("accept").getValue().toString()));
+                editor.putBoolean("startEnabled", Boolean.parseBoolean(snapshot.child("start").getValue().toString()));
+                editor.commit();
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+                mDialog.StopProcessDialog();
+                System.out.println("The read failed: " + firebaseError.getMessage());
+            }
+        });
+    }
+
 
     private void ShowToast(String message) {
         mDialog.StopProcessDialog();

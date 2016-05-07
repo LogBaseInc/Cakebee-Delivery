@@ -25,12 +25,14 @@ public class OrderlistAdapter extends ArrayAdapter<OrderDetails> {
     private final Context context;
     private final List<OrderDetails> values;
     private final Boolean hasStartedOrder;
+    private final Boolean isStartEnabled;
 
-    public OrderlistAdapter(Context context, List<OrderDetails> values, boolean hasStartedOrder) {
+    public OrderlistAdapter(Context context, List<OrderDetails> values, boolean isStartEnabled, boolean hasStartedOrder) {
         super(context, R.layout.orders, values);
         this.context = context;
         this.values = values;
         this.hasStartedOrder = hasStartedOrder;
+        this.isStartEnabled = isStartEnabled;
     }
 
     @Override
@@ -70,17 +72,19 @@ public class OrderlistAdapter extends ArrayAdapter<OrderDetails> {
         });
 
         OrderDetails orderDetail = values.get(position);
-        if(this.hasStartedOrder == false && orderDetail.Status == "Picked up" && (orderDetail.Startedon == null || orderDetail.Startedon == "")) {
+        if(this.isStartEnabled == true && this.hasStartedOrder == false && orderDetail.Status == "Picked up" && (orderDetail.Startedon == null || orderDetail.Startedon == ""))
             startbtn.setVisibility(View.VISIBLE);
-        }
-        else {
+        else
             startbtn.setVisibility(View.GONE);
-        }
+
 
         textView1.setText("#"+orderDetail.Id+ " ("+ orderDetail.Time+")");
         textView2.setText(orderDetail.Name);
         textView3.setText(orderDetail.Address);
-        textView4.setText((orderDetail.Status == "Picked up" && orderDetail.Startedon != null && orderDetail.Startedon != "") ? "Delivering this order" : orderDetail.Status);
+        if(this.isStartEnabled == true)
+            textView4.setText((orderDetail.Status == "Picked up" && orderDetail.Startedon != null && orderDetail.Startedon != "") ? "Delivering this order" : orderDetail.Status);
+        else
+            textView4.setText(orderDetail.Status);
 
         textView4.setTextColor(Color.parseColor(getColorCode(orderDetail)));
         return rowView;
