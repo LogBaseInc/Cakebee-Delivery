@@ -54,24 +54,9 @@ public class MyApp extends Application {
         return mContext;
     }
 
-    public void AddTrackingLog(String log) {
-        //InitializeLoggly();
-        //Loggly.i(deviceID + "_Tracking", log);
-    }
-
-    public void AddLoginLog(String log) {
-        //InitializeLoggly();
-        //Loggly.i(deviceID + "_Login", log);
-    }
-
-    public void AddCurrentActivityLog(String log) {
-        //InitializeLoggly();
-        //Loggly.i(deviceID+"_Activity", log);
-    }
-
-    public void AddEventActivityLog(String log) {
+    public void AddLogglyLog(String log, String tags) {
         InitializeLoggly();
-        Loggly.i(deviceID + "_Event", log);
+        Loggly.i(tags, log);
     }
 
     public void startDefaultTracking(){
@@ -230,7 +215,6 @@ public class MyApp extends Application {
             boolean stickStarted = stick.start();
             if (!stickStarted) {
                 ShowToast("Unable to start if blank device ID, no Network or GPS");
-                AddTrackingLog("Tracking not started. Internet Available: " + isInternetAvailable() + " .GPS Enabled: " + isGPSEnabled());
             }
         }
         else if(stick.isRunning() && updatefreq != frequency) {
@@ -251,7 +235,6 @@ public class MyApp extends Application {
             boolean stickStarted = stick.start();
             if (!stickStarted) {
                 ShowToast("Unable to start if blank device ID, no Network or GPS");
-                AddTrackingLog("Tracking not started. Internet Available: " + isInternetAvailable() + " .GPS Enabled: " + isGPSEnabled());
             }
         }
 
@@ -278,14 +261,11 @@ public class MyApp extends Application {
             String status = intent.getExtras().getString("SERVICE_STATUS");
             Log.i(LOG_TAG, "Received status: " + status);
             if((status != null)&&(status.equals("STOP"))) {
-                AddTrackingLog("Tracking stopped. Internet Available: " + isInternetAvailable() +" .GPS Enabled: " + isGPSEnabled());
                 ShowToast("Unable to run service, check if GPS and Network is connected");
             }
             else {
                 Calendar cal = Calendar.getInstance();
                 String date = android.text.format.DateFormat.format("MMM dd, yyyy hh:mm:ss a", cal.getTime()).toString();
-
-                AddTrackingLog(date);
 
                 SharedPreferences sharedPref = getSharedPreferences(getString(R.string.app_name), Context.MODE_PRIVATE);
                 SharedPreferences.Editor editor = sharedPref.edit();

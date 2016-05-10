@@ -2,10 +2,8 @@ package io.logbase.cakebeedelivery;
 
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -13,10 +11,13 @@ import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
-
+import com.sendgrid.SendGrid;
+import com.sendgrid.SendGridException;
+import android.util.Log;
 /**
  * Created by logbase on 26/04/16.
  */
+
 public class Utility {
 
     public static void sendActivity(String accountID, String deviceID, String orderId, String activity, SharedPreferences sharedPref){
@@ -50,6 +51,28 @@ public class Utility {
             System.out.println("Exception " + e.getMessage());
         }
     }
+
+    /*public static void sendEmail(String sub, String message){
+        System.out.println("sendEmail");
+        try {
+            SendGrid sendgrid = new SendGrid("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");
+
+            SendGrid.Email email = new SendGrid.Email();
+            email.addTo("kalaivani@logbase.io");
+            email.setFrom("stickagentapp@logbase.io");
+            email.setSubject(sub);
+            email.setText(message);
+
+            // Send email, execute http request
+            SendGrid.Response response = sendgrid.send(email);
+            String mMsgResponse = response.getMessage();
+
+            System.out.println("SendAppExample " + mMsgResponse);
+
+        } catch (Exception e) {
+            System.out.println("SendAppExample " + e.toString());
+        }
+    }*/
 
     // HTTP POST request
     private static void excutePost(JSONObject order) throws Exception
@@ -114,12 +137,33 @@ public class Utility {
                     if (conn != null)
                         conn.disconnect();
 
-                    //if (repeat == false && error != null)
-                        //s((MyApp)(MyApp.getContext().getApplicationContext())).AddEventActivityLog(body + " Error: " + error + " Responsecode: " + responsecode);
-
                 }
                 while (repeat == true);
             }
         });
+    }
+}
+
+class SendEmail extends AsyncTask<String, Void, Void> {
+
+    private Exception exception;
+
+    protected Void doInBackground(String... message) {
+        try {
+            SendGrid sendgrid = new SendGrid("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");
+
+            SendGrid.Email email = new SendGrid.Email();
+            email.addTo("kousik@logbase.io");
+            email.setFrom("StickAgent-App@logbase.io");
+            email.setSubject(message[0]);
+            email.setText(message[1]);
+
+            // Send email, execute http request
+            SendGrid.Response response = sendgrid.send(email);
+            String mMsgResponse = response.getMessage();
+        } catch (Exception e) {
+            System.out.println("SendAppExample " + e.toString());
+        }
+        return null;
     }
 }

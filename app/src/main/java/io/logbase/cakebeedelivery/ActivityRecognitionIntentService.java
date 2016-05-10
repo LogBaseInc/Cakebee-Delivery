@@ -32,10 +32,6 @@ public class ActivityRecognitionIntentService extends IntentService {
             i.putExtra("activity", mostProbableName);
             i.putExtra("confidence", confidence);
 
-            //System.out.println("Most Probable Name : " + mostProbableName + " Confidence : " + confidence);
-
-            ((MyApp)this.getApplicationContext()).AddCurrentActivityLog("Activity: " + mostProbableName+ " Confidence:" + confidence);
-
             //Send Broadcast to be listen in MainActivity
             this.sendBroadcast(i);
 
