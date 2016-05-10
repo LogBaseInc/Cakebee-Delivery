@@ -24,10 +24,7 @@ import android.graphics.PorterDuff;
 import android.content.DialogInterface;
 import android.app.AlertDialog;
 import android.widget.Toast;
-import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
-import com.firebase.client.FirebaseError;
-import com.firebase.client.ValueEventListener;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
@@ -52,6 +49,7 @@ public class OrderDetailActivity extends Activity implements ConnectionCallbacks
     private String currentDate;
     SharedPreferences sharedPref;
     boolean isStartedEnabled = false;
+    boolean isDeliverEnabled = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,6 +67,9 @@ public class OrderDetailActivity extends Activity implements ConnectionCallbacks
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
         currentDate = sdf.format(new java.util.Date());
 
+        isStartedEnabled = sharedPref.getBoolean("startEnabled", false);
+        isDeliverEnabled = sharedPref.getBoolean("deliverEnabled", true);
+
         Firebase.setAndroidContext(this);
         setGoogleApiClient();
         initialize();
@@ -79,6 +80,7 @@ public class OrderDetailActivity extends Activity implements ConnectionCallbacks
         super.onResume();
         ((MyApp) context.getApplicationContext()).setCurrentActivity(this);
         isStartedEnabled = sharedPref.getBoolean("startEnabled", false);
+        isDeliverEnabled = sharedPref.getBoolean("deliverEnabled", true);
     }
 
     @Override
@@ -347,10 +349,7 @@ public class OrderDetailActivity extends Activity implements ConnectionCallbacks
         TextView textView = (TextView) findViewById(R.id.clock);
         textView.setText(lastupdate);
 
-        //getOrderDetails();
-
         setOrderDetails();
-
     }
 
     private void setOrderDetails() {
@@ -418,57 +417,26 @@ public class OrderDetailActivity extends Activity implements ConnectionCallbacks
         acceptbtn.setVisibility(View.GONE);
         pickupbtn.setVisibility(View.GONE);
         deliveredbtn.setVisibility(View.GONE);
-        viewroutebtn.setVisibility(View.GONE);
         cancelbtn.setVisibility(View.GONE);
+        viewroutebtn.setVisibility(View.VISIBLE);
 
-        if(orderdetail.Status.equals("Yet to accept")) {
-            acceptbtn.setVisibility(View.VISIBLE);
-        }
-        else if(orderdetail.Status.equals("Yet to pick")) {
-            pickupbtn.setVisibility(View.VISIBLE);
-        }
-        else if (orderdetail.Status.equals("Picked up")) {
-            if(isStartedEnabled == false) {
+        if(orderdetail.Status != null) {
+            if (orderdetail.Status.equals("Yet to accept")) {
+                acceptbtn.setVisibility(View.VISIBLE);
+            } else if (orderdetail.Status.equals("Yet to pick")) {
+                pickupbtn.setVisibility(View.VISIBLE);
+            } else if (orderdetail.Status.equals("Picked up") ) {
+                if (isDeliverEnabled == true && isStartedEnabled == false) {
+                    deliveredbtn.setVisibility(View.VISIBLE);
+                } else if (isDeliverEnabled == true && orderdetail.Startedon != null && orderdetail.Startedon != "") {
+                    deliveredbtn.setVisibility(View.VISIBLE);
+                    cancelbtn.setVisibility(View.VISIBLE);
+                }
+            }
+            else if(orderdetail.Status.equals("Yet to deliver") && isDeliverEnabled == true) {
                 deliveredbtn.setVisibility(View.VISIBLE);
             }
-            else if(orderdetail.Startedon != null && orderdetail.Startedon != "") {
-                deliveredbtn.setVisibility(View.VISIBLE);
-                cancelbtn.setVisibility(View.VISIBLE);
-            }
-            viewroutebtn.setVisibility(View.VISIBLE);
         }
-    }
-
-    private void getOrderDetails() {
-        Firebase myFirebaseRef = new Firebase(getString(R.string.friebaseurl) + "accounts/" + accountID + "/orders/" + deviceID + "/" + currentDate + "/" + orderdetail.Id);
-        myFirebaseRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot snapshot) {
-                orderdetail = snapshot.getValue(OrderDetails.class);
-                if (orderdetail != null) {
-                    orderdetail.Id = snapshot.getKey();
-                    if (orderdetail.Cancelledon != null && orderdetail.Cancelledon != "") {
-                        orderdetail.Status = "Cancelled";
-                    } else if (orderdetail.Deliveredon != null && orderdetail.Deliveredon != "") {
-                        orderdetail.Status = "Delivered";
-                    } else if (orderdetail.Pickedon != null && orderdetail.Pickedon != "") {
-                        orderdetail.Status = "Picked up";
-                    } else if (orderdetail.Acceptedon != null && orderdetail.Acceptedon != "") {
-                        orderdetail.Status = "Yet to pick";
-                    } else {
-                        orderdetail.Status = "Yet to accept";
-                    }
-
-                    setOrderDetails();
-                } else
-                    goback(null);
-            }
-
-            @Override
-            public void onCancelled(FirebaseError firebaseError) {
-                System.out.println("The read failed: " + firebaseError.getMessage());
-            }
-        });
     }
 
     private void startTracking(String deviceID) {

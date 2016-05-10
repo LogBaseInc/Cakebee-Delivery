@@ -272,8 +272,7 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
             @Override
             public void onDataChange(DataSnapshot snapshot) {
                 mDialog.StopProcessDialog();
-                GetAppSettings(snapshot.getValue().toString());
-                GoToOrders(snapshot.getValue().toString(), deviceId);
+                GetAppSettings(snapshot.getValue().toString(), deviceId);
             }
 
             @Override
@@ -284,17 +283,29 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
         });
     }
 
-    private void GetAppSettings(String accountid) {
+    private void GetAppSettings(String accountid, String devid) {
+        final String deviceId = devid;
+        final String accountId = accountid;
+
         Firebase myFirebaseRef = new Firebase(getString(R.string.friebaseurl)+"/accounts/"+accountid+"/settings/agentapp");
-        myFirebaseRef.addValueEventListener(new ValueEventListener() {
+        myFirebaseRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot snapshot) {
-                mDialog.StopProcessDialog();
-
                 SharedPreferences.Editor editor = sharedPref.edit();
-                editor.putBoolean("acceptEnabled", Boolean.parseBoolean(snapshot.child("accept").getValue().toString()));
-                editor.putBoolean("startEnabled", Boolean.parseBoolean(snapshot.child("start").getValue().toString()));
+                if(snapshot.getValue() != null) {
+                    editor.putBoolean("acceptEnabled", snapshot.child("accept").getValue() != null ? Boolean.parseBoolean(snapshot.child("accept").getValue().toString()) : false);
+                    editor.putBoolean("startEnabled",  snapshot.child("start").getValue() != null ? Boolean.parseBoolean(snapshot.child("start").getValue().toString()) : false);
+                    editor.putBoolean("pickupEnabled", snapshot.child("pickup").getValue() != null ? Boolean.parseBoolean(snapshot.child("pickup").getValue().toString()) : false);
+                    editor.putBoolean("deliverEnabled", true);
+                }
+                else {
+                    editor.putBoolean("acceptEnabled", false);
+                    editor.putBoolean("startEnabled", false);
+                    editor.putBoolean("pickupEnabled", false);
+                    editor.putBoolean("deliverEnabled", true);
+                }
                 editor.commit();
+                GoToOrders(accountId, deviceId);
             }
 
             @Override

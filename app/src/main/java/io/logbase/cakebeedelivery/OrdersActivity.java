@@ -47,7 +47,10 @@ public class OrdersActivity extends ListActivity {
     boolean isAcceptEnabled = false;
     boolean isStartedEnabled = false;
     boolean isPickupEnabled = false;
-    boolean isDeliveredEnabled = false;
+    boolean isDeliverEnabled = false;
+    SharedPreferences sharedPref;
+    Boolean hasStartedOrder = false;
+    int pickedupordercount = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,12 +76,17 @@ public class OrdersActivity extends ListActivity {
 
         Firebase.setAndroidContext(this);
 
-        SharedPreferences sharedPref = getSharedPreferences(getString(R.string.app_name), Context.MODE_PRIVATE);
+        sharedPref = getSharedPreferences(getString(R.string.app_name), Context.MODE_PRIVATE);
         deviceID = sharedPref.getString("deviceID", null);
         accountID = sharedPref.getString("accountID", null);
         accountname = sharedPref.getString("accountname", null);
+
         isStartedEnabled = sharedPref.getBoolean("startEnabled", false);
         isAcceptEnabled = sharedPref.getBoolean("acceptEnabled", false);
+        isPickupEnabled = sharedPref.getBoolean("pickupEnabled", false);
+        isDeliverEnabled = sharedPref.getBoolean("deliverEnabled", true);
+
+        getAppStatusSettings();
 
         getWebhookUrl();
         initializeSwtich();
@@ -175,6 +183,7 @@ public class OrdersActivity extends ListActivity {
     }
 
     private void getOrders () {
+        System.out.println("getOrders");
         mDialog.StartProcessDialog();
 
         TextView title = (TextView)findViewById(R.id.title);
@@ -184,6 +193,7 @@ public class OrdersActivity extends ListActivity {
         myFirebaseRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot snapshot) {
+                System.out.println(snapshot.getValue());
                 mDialog.StopProcessDialog();
                 ((MyApp) context.getApplicationContext()).Clear(true);
                 ((MyApp) context.getApplicationContext()).Clear(false);
@@ -194,13 +204,13 @@ public class OrdersActivity extends ListActivity {
                 if (isChecked == true) {
                     Object orders = snapshot.getValue();
                     if (orders != null) {
-                        Boolean hasStartedOrder = false;
-
                         ListView listview = (ListView) findViewById(android.R.id.list);
                         listview.setVisibility(View.VISIBLE);
                         TextView nolist = (TextView) findViewById(R.id.nolist);
                         nolist.setVisibility(View.GONE);
-                        int pickedupordercount = 0;
+
+                        hasStartedOrder = false;
+                        pickedupordercount = 0;
 
                         String ordersString = orders.toString();
 
@@ -221,103 +231,9 @@ public class OrdersActivity extends ListActivity {
                                     Entry<String, JsonNode> entry = (Entry<String, JsonNode>) nodeIterator.next();
                                     if (entry.getKey() != "LoggedOn" && entry.getKey() != "Loggedat" && entry.getKey() != "Activity" && entry.getKey() != "Loggedin") {
                                         OrderDetails orderdet = mapper.convertValue(entry.getValue(), OrderDetails.class);
-                                        if (IsOrderValid(orderdet)) {
-                                            String[] timesplit = new String[0];
-                                            boolean ispickupam = true;
-                                            boolean isdeliveryam = true;
-
-                                            if (!(orderdet.Time.contains("Mid"))) {
-                                                orderdet.Time = orderdet.Time.toLowerCase();
-                                                if (orderdet.Time.contains(":")) {
-                                                    orderdet.Time = orderdet.Time.replaceAll(":", ".");
-                                                }
-
-                                                timesplit = orderdet.Time.split("-");
-                                                if (timesplit.length >= 2) {
-                                                    timesplit[0] = timesplit[0].replaceAll(" ", "");
-                                                    timesplit[1] = timesplit[1].replaceAll(" ", "");
-
-                                                    Boolean ispm = false;
-                                                    isdeliveryam = !(timesplit[1].contains("pm"));
-                                                    if (timesplit[0].contains("am")) {
-                                                        ispm = false;
-                                                        ispickupam = true;
-                                                        timesplit[1] = timesplit[1].replaceAll("am", "");
-                                                        timesplit[1] = timesplit[1].replaceAll("pm", "");
-                                                        if (Double.parseDouble(timesplit[1]) == 12)
-                                                            isdeliveryam = false;
-                                                    } else if (timesplit[0].contains("pm")) {
-                                                        ispm = true;
-                                                        ispickupam = false;
-
-                                                        timesplit[0] = timesplit[0].replaceAll("am", "");
-                                                        timesplit[0] = timesplit[0].replaceAll("pm", "");
-                                                        timesplit[1] = timesplit[1].replaceAll("am", "");
-                                                        timesplit[1] = timesplit[1].replaceAll("pm", "");
-
-                                                        if (Double.parseDouble(timesplit[1]) == 12)
-                                                            isdeliveryam = false;
-                                                        if (Double.parseDouble(timesplit[0]) == 12)
-                                                            ispm = false;
-                                                    } else {
-                                                        if (timesplit[1].indexOf("pm") >= 0 && Double.parseDouble(timesplit[0]) >= 1 && Double.parseDouble(timesplit[0]) < 12) {
-                                                            timesplit[1] = timesplit[1].replaceAll("am", "");
-                                                            timesplit[1] = timesplit[1].replaceAll("pm", "");
-                                                            if (Double.parseDouble(timesplit[1]) != 12) {
-                                                                ispm = true;
-                                                                ispickupam = false;
-                                                            } else {
-                                                                isdeliveryam = false;
-                                                            }
-                                                        }
-                                                    }
-
-                                                    timesplit[0] = timesplit[0].replaceAll("am", "");
-                                                    timesplit[0] = timesplit[0].replaceAll("pm", "");
-
-                                                    orderdet.TimeSort = (Double.isNaN(Double.parseDouble(timesplit[0])) ? 24 : (ispm ? (Double.parseDouble(timesplit[0]) + 12) : Double.parseDouble(timesplit[0])));
-                                                } else
-                                                    orderdet.TimeSort = 0.0;
-                                            } else {
-                                                orderdet.TimeSort = 24.0;
-                                            }
-
-                                            orderdet.Name = upperCaseFirst(orderdet.Name);
-                                            orderdet.Id = entry.getKey();
-
-                                            if (orderdet.Cancelledon != null && orderdet.Cancelledon != "") {
-                                                orderdet.Status = "Cancelled";
-                                                ((MyApp) context.getApplicationContext()).removeOrders(orderdet.Id, false);
-                                                ((MyApp) context.getApplicationContext()).removeOrders(orderdet.Id, true);
-                                            } else if (orderdet.Deliveredon != null && orderdet.Deliveredon != "") {
-                                                orderdet.Status = "Delivered";
-                                                ((MyApp) context.getApplicationContext()).removeOrders(orderdet.Id, false);
-                                                ((MyApp) context.getApplicationContext()).removeOrders(orderdet.Id, true);
-                                            } else if (orderdet.Pickedon != null && orderdet.Pickedon != "") {
-                                                if(orderdet.Startedon != null && orderdet.Startedon != "") {
-                                                    hasStartedOrder = true;
-                                                }
-                                                orderdet.Status = "Picked up";
-                                                pickedupordercount = pickedupordercount + 1;
-
-                                                ((MyApp) context.getApplicationContext()).removeOrders(orderdet.Id, true);
-                                                if (timesplit.length >= 1)
-                                                    ((MyApp) context.getApplicationContext()).addOrders(orderdet.Id, timesplit[1], isdeliveryam, false);
-                                            } else {
-                                                if (isAcceptEnabled == true && (orderdet.Acceptedon == null || orderdet.Acceptedon == ""))
-                                                    orderdet.Status = "Yet to accept";
-                                                else
-                                                    orderdet.Status = "Yet to pick";
-
-                                                if (timesplit.length >= 1)
-                                                    ((MyApp) context.getApplicationContext()).addOrders(orderdet.Id, timesplit[0], ispickupam, true);
-
-                                                if (timesplit.length >= 2)
-                                                    ((MyApp) context.getApplicationContext()).addOrders(orderdet.Id, timesplit[1], isdeliveryam, false);
-                                            }
-
-                                            orderDetaillist.add(orderdet);
-                                        }
+                                        OrderDetails orderDetailObj = getOrderDetailObj(orderdet, entry.getKey());
+                                        if (orderDetailObj != null)
+                                            orderDetaillist.add(orderDetailObj);
                                     }
                                 }
 
@@ -446,5 +362,179 @@ public class OrdersActivity extends ListActivity {
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
         }
+    }
+
+    private void getAppStatusSettings() {
+        Firebase myFirebaseRef = new Firebase(getString(R.string.friebaseurl)+"/accounts/"+accountID+"/settings/agentapp");
+        myFirebaseRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                mDialog.StopProcessDialog();
+                boolean accept = false;
+                boolean start = false;
+                boolean pickup = false;
+                boolean deliver = true;
+
+                if (snapshot.getValue() != null) {
+                    accept = snapshot.child("accept").getValue() != null ? Boolean.parseBoolean(snapshot.child("accept").getValue().toString()) : false;
+                    start = snapshot.child("start").getValue() != null ? Boolean.parseBoolean(snapshot.child("start").getValue().toString()) : false;
+                    pickup = snapshot.child("pickup").getValue() != null ? Boolean.parseBoolean(snapshot.child("pickup").getValue().toString()) : false;
+                    deliver = true;
+                }
+
+                boolean ischanged = false;
+                if (accept != isAcceptEnabled)
+                    ischanged = true;
+                else if (start != isStartedEnabled)
+                    ischanged = true;
+                else if (pickup != isPickupEnabled)
+                    ischanged = true;
+                else if (deliver != isDeliverEnabled)
+                    ischanged = true;
+
+                isAcceptEnabled = accept;
+                isStartedEnabled = start;
+                isPickupEnabled = pickup;
+                isDeliverEnabled = deliver;
+
+                SharedPreferences.Editor editor = sharedPref.edit();
+                editor.putBoolean("acceptEnabled", isAcceptEnabled);
+                editor.putBoolean("startEnabled", isStartedEnabled);
+                editor.putBoolean("pickupEnabled", isPickupEnabled);
+                editor.putBoolean("deliverEnabled", isDeliverEnabled);
+                editor.commit();
+
+                if(ischanged == true && orderDetaillist != null) {
+                    ((MyApp) context.getApplicationContext()).Clear(true);
+                    ((MyApp) context.getApplicationContext()).Clear(false);
+
+                    hasStartedOrder = false;
+                    pickedupordercount = 0;
+
+                    List<OrderDetails> newOrderDetails = new ArrayList<OrderDetails>();
+                    for (int i=0; i< orderDetaillist.size(); i++) {
+                        OrderDetails orderdet = orderDetaillist.get(i);
+                        newOrderDetails.add(getOrderDetailObj(orderdet, orderdet.Id));
+                    }
+
+                    orderDetaillist = newOrderDetails;
+                    OrderlistAdapter listAdapter = new OrderlistAdapter(context, orderDetaillist, isStartedEnabled, hasStartedOrder);
+                    setListAdapter(listAdapter);
+                }
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+                mDialog.StopProcessDialog();
+                System.out.println("The read failed: " + firebaseError.getMessage());
+            }
+        });
+    }
+
+    private OrderDetails getOrderDetailObj(OrderDetails orderdet, String orderId) {
+        if (IsOrderValid(orderdet)) {
+            String[] timesplit = new String[0];
+            boolean ispickupam = true;
+            boolean isdeliveryam = true;
+
+            if (!(orderdet.Time.contains("Mid"))) {
+                orderdet.Time = orderdet.Time.toLowerCase();
+                if (orderdet.Time.contains(":")) {
+                    orderdet.Time = orderdet.Time.replaceAll(":", ".");
+                }
+
+                timesplit = orderdet.Time.split("-");
+                if (timesplit.length >= 2) {
+                    timesplit[0] = timesplit[0].replaceAll(" ", "");
+                    timesplit[1] = timesplit[1].replaceAll(" ", "");
+
+                    Boolean ispm = false;
+                    isdeliveryam = !(timesplit[1].contains("pm"));
+                    if (timesplit[0].contains("am")) {
+                        ispm = false;
+                        ispickupam = true;
+                        timesplit[1] = timesplit[1].replaceAll("am", "");
+                        timesplit[1] = timesplit[1].replaceAll("pm", "");
+                        if (Double.parseDouble(timesplit[1]) == 12)
+                            isdeliveryam = false;
+                    } else if (timesplit[0].contains("pm")) {
+                        ispm = true;
+                        ispickupam = false;
+
+                        timesplit[0] = timesplit[0].replaceAll("am", "");
+                        timesplit[0] = timesplit[0].replaceAll("pm", "");
+                        timesplit[1] = timesplit[1].replaceAll("am", "");
+                        timesplit[1] = timesplit[1].replaceAll("pm", "");
+
+                        if (Double.parseDouble(timesplit[1]) == 12)
+                            isdeliveryam = false;
+                        if (Double.parseDouble(timesplit[0]) == 12)
+                            ispm = false;
+                    } else {
+                        if (timesplit[1].indexOf("pm") >= 0 && Double.parseDouble(timesplit[0]) >= 1 && Double.parseDouble(timesplit[0]) < 12) {
+                            timesplit[1] = timesplit[1].replaceAll("am", "");
+                            timesplit[1] = timesplit[1].replaceAll("pm", "");
+                            if (Double.parseDouble(timesplit[1]) != 12) {
+                                ispm = true;
+                                ispickupam = false;
+                            } else {
+                                isdeliveryam = false;
+                            }
+                        }
+                    }
+
+                    timesplit[0] = timesplit[0].replaceAll("am", "");
+                    timesplit[0] = timesplit[0].replaceAll("pm", "");
+
+                    orderdet.TimeSort = (Double.isNaN(Double.parseDouble(timesplit[0])) ? 24 : (ispm ? (Double.parseDouble(timesplit[0]) + 12) : Double.parseDouble(timesplit[0])));
+                } else
+                    orderdet.TimeSort = 0.0;
+            } else {
+                orderdet.TimeSort = 24.0;
+            }
+
+            orderdet.Name = upperCaseFirst(orderdet.Name);
+            orderdet.Id = orderId;
+
+            if (orderdet.Cancelledon != null && orderdet.Cancelledon != "") {
+                orderdet.Status = "Cancelled";
+                ((MyApp) context.getApplicationContext()).removeOrders(orderdet.Id, false);
+                ((MyApp) context.getApplicationContext()).removeOrders(orderdet.Id, true);
+            } else if (orderdet.Deliveredon != null && orderdet.Deliveredon != "") {
+                orderdet.Status = "Delivered";
+                ((MyApp) context.getApplicationContext()).removeOrders(orderdet.Id, false);
+                ((MyApp) context.getApplicationContext()).removeOrders(orderdet.Id, true);
+            } else if (orderdet.Pickedon != null && orderdet.Pickedon != "") {
+                if (orderdet.Startedon != null && orderdet.Startedon != "") {
+                    hasStartedOrder = true;
+                }
+                orderdet.Status = "Picked up";
+                pickedupordercount = pickedupordercount + 1;
+
+                ((MyApp) context.getApplicationContext()).removeOrders(orderdet.Id, true);
+                if (timesplit.length >= 1)
+                    ((MyApp) context.getApplicationContext()).addOrders(orderdet.Id, timesplit[1], isdeliveryam, false);
+            } else {
+                if (isAcceptEnabled == true && (orderdet.Acceptedon == null || orderdet.Acceptedon == ""))
+                    orderdet.Status = "Yet to accept";
+                else if (isPickupEnabled == true)
+                    orderdet.Status = "Yet to pick";
+                else if (isDeliverEnabled == true)
+                    orderdet.Status = "Yet to deliver";
+                else
+                    orderdet.Status = null;
+
+                if (orderdet.Status != null) {
+                    if (timesplit.length >= 1 && isPickupEnabled == true)
+                        ((MyApp) context.getApplicationContext()).addOrders(orderdet.Id, timesplit[0], ispickupam, true);
+                    if (timesplit.length >= 2 && isDeliverEnabled == true)
+                        ((MyApp) context.getApplicationContext()).addOrders(orderdet.Id, timesplit[1], isdeliveryam, false);
+                }
+            }
+
+           return orderdet;
+        }
+        else
+            return null;
     }
 }
