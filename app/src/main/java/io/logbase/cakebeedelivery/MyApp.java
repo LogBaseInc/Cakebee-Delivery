@@ -192,7 +192,6 @@ public class MyApp extends Application {
     }
 
     public void stopAndStartTracking(){
-        System.out.println("stopAndStartTracking");
         updatefreq = 0;
         startTracking(30);
     }
@@ -213,6 +212,7 @@ public class MyApp extends Application {
 
             stick = new StickMobile(this, deviceID, frequency, null);
             boolean stickStarted = stick.start();
+            System.out.println("Started");
             if (!stickStarted) {
                 ShowToast("Unable to start if blank device ID, no Network or GPS");
             }
@@ -226,6 +226,7 @@ public class MyApp extends Application {
                 public void run() {
                     stick = new StickMobile(context, deviceID, updatefreq, null);
                     stick.start();
+                    System.out.println("Started 1");
                     isstopinprogress = false;
                 }
             }, 30000);
@@ -233,6 +234,7 @@ public class MyApp extends Application {
         else if(stick.isRunning() == false && isstopinprogress == false) {
             stick = new StickMobile(context, deviceID, frequency, null);
             boolean stickStarted = stick.start();
+            System.out.println("Started 2");
             if (!stickStarted) {
                 ShowToast("Unable to start if blank device ID, no Network or GPS");
             }
@@ -260,7 +262,11 @@ public class MyApp extends Application {
         public void onReceive(Context context, Intent intent) {
             String status = intent.getExtras().getString("SERVICE_STATUS");
             Log.i(LOG_TAG, "Received status: " + status);
-            if((status != null)&&(status.equals("STOP"))) {
+            if((status != null)&&(status.equals("LocationPermission_Denied"))) {
+                stick.stop();
+                ShowToast("Allow the app to access Location. Go to Settings -> App -> Stick Agent -> Permission, and enable Location");
+            }
+            else if((status != null)&&(status.equals("STOP"))) {
                 ShowToast("Unable to run service, check if GPS and Network is connected");
             }
             else {

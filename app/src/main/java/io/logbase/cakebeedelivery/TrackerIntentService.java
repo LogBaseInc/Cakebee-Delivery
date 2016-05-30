@@ -1,15 +1,18 @@
 package io.logbase.cakebeedelivery;
 
+import android.Manifest;
 import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.PowerManager;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
@@ -175,6 +178,35 @@ public class TrackerIntentService extends IntentService implements
     @Override
     public void onConnected(Bundle connectionHint) {
         Log.i(LOG_TAG, "Google API connected");
+        if(Utility.checkLocationPermission()) {
+            requestLocationUpdates();
+        }
+        else {
+            //Broadcast to activity new state
+            Intent localIntent = new Intent("STICK_MOBILE_BROADCAST")
+                    .putExtra("SERVICE_STATUS", "LocationPermission_Denied");
+            // Broadcasts the Intent to receivers in this app.
+            LocalBroadcastManager.getInstance(this).sendBroadcast(localIntent);
+        }
+    }
+
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        System.out.println("onRequestPermissionsResult");
+        switch (requestCode) {
+            case 1: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    requestLocationUpdates();
+
+                } else {
+                    // permission denied
+                }
+                return;
+            }
+        }
+    }
+
+    private void requestLocationUpdates() {
         LocationRequest mLocationRequest = new LocationRequest();
         mLocationRequest.setInterval(frequency);
         mLocationRequest.setFastestInterval(frequency);

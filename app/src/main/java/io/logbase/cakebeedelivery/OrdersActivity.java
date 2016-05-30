@@ -33,6 +33,8 @@ import java.util.Collections;
 import java.util.UUID;
 import android.widget.CompoundButton;
 import android.content.pm.PackageInfo;
+import android.support.v4.app.ActivityCompat;
+import android.Manifest;
 
 public class OrdersActivity extends ListActivity {
     List<OrderDetails> orderDetaillist;
@@ -54,11 +56,14 @@ public class OrdersActivity extends ListActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        System.out.println("onCreate");
+        System.out.println("Permission accepted");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.orders);
         context = this;
 
         mDialog = new LBProcessDialog(this);
+
     }
 
     @Override

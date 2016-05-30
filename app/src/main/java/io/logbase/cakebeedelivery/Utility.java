@@ -1,5 +1,6 @@
 package io.logbase.cakebeedelivery;
 
+import android.app.Activity;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import org.json.JSONException;
@@ -12,8 +13,8 @@ import java.net.ProtocolException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import com.sendgrid.SendGrid;
-import com.sendgrid.SendGridException;
-import android.util.Log;
+import android.content.pm.PackageManager;
+import android.support.v4.content.ContextCompat;
 /**
  * Created by logbase on 26/04/16.
  */
@@ -52,27 +53,11 @@ public class Utility {
         }
     }
 
-    /*public static void sendEmail(String sub, String message){
-        System.out.println("sendEmail");
-        try {
-            SendGrid sendgrid = new SendGrid("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");
-
-            SendGrid.Email email = new SendGrid.Email();
-            email.addTo("kalaivani@logbase.io");
-            email.setFrom("stickagentapp@logbase.io");
-            email.setSubject(sub);
-            email.setText(message);
-
-            // Send email, execute http request
-            SendGrid.Response response = sendgrid.send(email);
-            String mMsgResponse = response.getMessage();
-
-            System.out.println("SendAppExample " + mMsgResponse);
-
-        } catch (Exception e) {
-            System.out.println("SendAppExample " + e.toString());
-        }
-    }*/
+    public static boolean checkLocationPermission()
+    {
+        int res = ContextCompat.checkSelfPermission(MyApp.getContext(), android.Manifest.permission.ACCESS_FINE_LOCATION);
+        return (res == PackageManager.PERMISSION_GRANTED);
+    }
 
     // HTTP POST request
     private static void excutePost(JSONObject order) throws Exception

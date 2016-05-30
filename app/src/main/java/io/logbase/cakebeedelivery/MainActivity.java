@@ -1,10 +1,12 @@
 package io.logbase.cakebeedelivery;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.pm.PackageManager;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -21,7 +23,6 @@ import com.firebase.client.Firebase;
 import com.firebase.client.ValueEventListener;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.FirebaseError;
-
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Iterator;
@@ -69,6 +70,15 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
     @Override
     public void onResume() {
         super.onResume();
+        if(Utility.checkLocationPermission()) {
+            initializeSettings();
+        }
+        else {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+        }
+    }
+
+    private void initializeSettings() {
         ((MyApp) context.getApplicationContext()).setCurrentActivity(this);
         CheckUpdates();
 
@@ -92,9 +102,22 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
         idleTrackTime.setSelection(indexOfidleTrackTime);
 
         setDeliveryTrackTimeArray(trackDefaultFreq);
-
     }
 
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case 1: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    initializeSettings();
+
+                } else {
+                    // permission denied
+                }
+                return;
+            }
+        }
+    }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -131,32 +154,35 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
     }
 
     public void saveDeviceID(View view) {
-        mDialog.StartProcessDialog();
+        if(Utility.checkLocationPermission()) {
+            mDialog.StartProcessDialog();
 
-        LinearLayout editlayout = (LinearLayout)findViewById(R.id.editlayout);
-        String accountname = null;
-        String username = null;
+            LinearLayout editlayout = (LinearLayout) findViewById(R.id.editlayout);
+            String accountname = null;
+            String username = null;
 
-        if(editlayout.getVisibility() == View.GONE) {
-            EditText accountnameText = (EditText) findViewById(R.id.accountname);
-            accountname = accountnameText.getText().toString();
+            if (editlayout.getVisibility() == View.GONE) {
+                EditText accountnameText = (EditText) findViewById(R.id.accountname);
+                accountname = accountnameText.getText().toString();
 
-            EditText usernameText = (EditText) findViewById(R.id.username);
-            username = usernameText.getText().toString();
+                EditText usernameText = (EditText) findViewById(R.id.username);
+                username = usernameText.getText().toString();
+            } else {
+                EditText accountnameText = (EditText) findViewById(R.id.editaccountname);
+                accountname = accountnameText.getText().toString();
+
+                EditText usernameText = (EditText) findViewById(R.id.editusername);
+                username = usernameText.getText().toString();
+            }
+
+            if ((accountname != null) && (!accountname.equals("")) && (username != null) && (!username.equals(""))) {
+                CheckDeviceId(accountname, username);
+            } else {
+                ShowToast("Unable to save blank ID");
+            }
         }
         else {
-            EditText accountnameText = (EditText) findViewById(R.id.editaccountname);
-            accountname = accountnameText.getText().toString();
-
-            EditText usernameText = (EditText) findViewById(R.id.editusername);
-            username = usernameText.getText().toString();
-        }
-
-        if((accountname != null) && (!accountname.equals("")) && (username != null) && (!username.equals(""))) {
-            CheckDeviceId(accountname, username);
-        }
-        else {
-            ShowToast("Unable to save blank ID");
+            ShowToast("Allow app to use location service.");
         }
     }
 
@@ -428,7 +454,7 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
         AlarmManager alarmManager=(AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(context, AlarmReceiver.class);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
-        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), (60000 * 10), pendingIntent); //10 mins
+        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), (60000 * 20), pendingIntent); //20 mins
     }
 
     private void CheckUpdates() {

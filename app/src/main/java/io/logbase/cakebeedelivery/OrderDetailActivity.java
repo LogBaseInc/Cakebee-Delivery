@@ -260,59 +260,60 @@ public class OrderDetailActivity extends Activity implements ConnectionCallbacks
     }
 
     private void getlocation(String deviceID, String currentDate, String attext) {
-        Location mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-        if (mLastLocation != null) {
+        if(Utility.checkLocationPermission()) {
+            Location mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+            if (mLastLocation != null) {
 
-            Geocoder geocoder;
-            List<Address> addresses;
-            geocoder = new Geocoder(this, Locale.getDefault());
+                Geocoder geocoder;
+                List<Address> addresses;
+                geocoder = new Geocoder(this, Locale.getDefault());
 
-            try {
-                addresses = geocoder.getFromLocation(mLastLocation.getLatitude(), mLastLocation.getLongitude(), 1);
-                if (addresses != null) {
-                    Address returnedAddress = addresses.get(0);
-                    StringBuilder strReturnedAddress = new StringBuilder("");
+                try {
+                    addresses = geocoder.getFromLocation(mLastLocation.getLatitude(), mLastLocation.getLongitude(), 1);
+                    if (addresses != null) {
+                        Address returnedAddress = addresses.get(0);
+                        StringBuilder strReturnedAddress = new StringBuilder("");
 
-                    for (int i = 0; i < returnedAddress.getMaxAddressLineIndex(); i++) {
-                        if (i == 1)
-                            strReturnedAddress.append(", ");
-                        if (i <= 1)
-                            strReturnedAddress.append(returnedAddress.getAddressLine(i));
-                        else
-                            break;
-                    }
-                    String address = strReturnedAddress.toString();
-                    if (attext == "Pickedat") {
-                        Firebase myFirebaseRef = new Firebase(getString(R.string.friebaseurl) + "accounts/" + accountID + "/orders/" + deviceID + "/" + currentDate + "/" + orderdetail.Id + "/Startlocation");
-                        myFirebaseRef.setValue(address);
-                    } else if (attext == "Deliveredat") {
-                        Firebase myFirebaseRef = new Firebase(getString(R.string.friebaseurl) + "accounts/" + accountID + "/orders/" + deviceID + "/" + currentDate + "/" + orderdetail.Id + "/Endlocation");
-                        myFirebaseRef.setValue(address);
+                        for (int i = 0; i < returnedAddress.getMaxAddressLineIndex(); i++) {
+                            if (i == 1)
+                                strReturnedAddress.append(", ");
+                            if (i <= 1)
+                                strReturnedAddress.append(returnedAddress.getAddressLine(i));
+                            else
+                                break;
+                        }
+                        String address = strReturnedAddress.toString();
+                        if (attext == "Pickedat") {
+                            Firebase myFirebaseRef = new Firebase(getString(R.string.friebaseurl) + "accounts/" + accountID + "/orders/" + deviceID + "/" + currentDate + "/" + orderdetail.Id + "/Startlocation");
+                            myFirebaseRef.setValue(address);
+                        } else if (attext == "Deliveredat") {
+                            Firebase myFirebaseRef = new Firebase(getString(R.string.friebaseurl) + "accounts/" + accountID + "/orders/" + deviceID + "/" + currentDate + "/" + orderdetail.Id + "/Endlocation");
+                            myFirebaseRef.setValue(address);
 
-                        if (orderdetail.Pickedat != null && orderdetail.Pickedat != "") {
-                            float[] results = new float[5];
-                            String[] pickedarray = orderdetail.Pickedat.split(" ");
-                            Location.distanceBetween(Double.parseDouble(pickedarray[0]), Double.parseDouble(pickedarray[1]), mLastLocation.getLatitude(), mLastLocation.getLongitude(), results);
-                            if (results != null && results.length > 0) {
-                                float distance = (results[0] / 1000);
+                            if (orderdetail.Pickedat != null && orderdetail.Pickedat != "") {
+                                float[] results = new float[5];
+                                String[] pickedarray = orderdetail.Pickedat.split(" ");
+                                Location.distanceBetween(Double.parseDouble(pickedarray[0]), Double.parseDouble(pickedarray[1]), mLastLocation.getLatitude(), mLastLocation.getLongitude(), results);
+                                if (results != null && results.length > 0) {
+                                    float distance = (results[0] / 1000);
 
-                                Firebase distref = new Firebase(getString(R.string.friebaseurl) + "accounts/" + accountID + "/orders/" + deviceID + "/" + currentDate + "/" + orderdetail.Id + "/Distance");
-                                distref.setValue(distance);
+                                    Firebase distref = new Firebase(getString(R.string.friebaseurl) + "accounts/" + accountID + "/orders/" + deviceID + "/" + currentDate + "/" + orderdetail.Id + "/Distance");
+                                    distref.setValue(distance);
+                                }
                             }
                         }
                     }
+                } catch (IOException e) {
+                    System.out.print("Error:" + e.getLocalizedMessage());
+                    e.printStackTrace();
                 }
-            } catch (IOException e) {
-                System.out.print("Error:" + e.getLocalizedMessage());
-                e.printStackTrace();
+
+                Firebase myFirebaseRef1 = new Firebase(getString(R.string.friebaseurl) + "accounts/" + accountID + "/orders/" + deviceID + "/" + currentDate + "/" + orderdetail.Id + "/" + attext);
+                myFirebaseRef1.setValue(mLastLocation.getLatitude() + " " + mLastLocation.getLongitude());
+            } else if (attext.contains("route")) {
+                showToast("Current location not identified");
             }
-
-            Firebase myFirebaseRef1 = new Firebase(getString(R.string.friebaseurl) + "accounts/" + accountID + "/orders/" + deviceID + "/" + currentDate + "/" + orderdetail.Id + "/" + attext);
-            myFirebaseRef1.setValue(mLastLocation.getLatitude() + " " + mLastLocation.getLongitude());
-        } else if (attext.contains("route")) {
-            showToast("Current location not identified");
         }
-
         mDialog.StopProcessDialog();
     }
 
