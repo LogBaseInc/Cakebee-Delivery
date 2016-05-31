@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.widget.Button;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.ListView;
@@ -33,8 +34,10 @@ import java.util.Collections;
 import java.util.UUID;
 import android.widget.CompoundButton;
 import android.content.pm.PackageInfo;
-import android.support.v4.app.ActivityCompat;
-import android.Manifest;
+import android.app.Dialog;
+import android.app.DatePickerDialog;
+import java.util.Calendar;
+import android.widget.DatePicker;
 
 public class OrdersActivity extends ListActivity {
     List<OrderDetails> orderDetaillist;
@@ -53,14 +56,23 @@ public class OrdersActivity extends ListActivity {
     SharedPreferences sharedPref;
     Boolean hasStartedOrder = false;
     int pickedupordercount = 0;
+    private Calendar calendar;
+    private int year, month, day;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        System.out.println("onCreate");
-        System.out.println("Permission accepted");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.orders);
         context = this;
+
+        calendar = Calendar.getInstance();
+        year = calendar.get(Calendar.YEAR);
+        month = calendar.get(Calendar.MONTH);
+        day = calendar.get(Calendar.DAY_OF_MONTH);
+
+        Button datebtn = (Button) findViewById(R.id.datebtn);
+        SimpleDateFormat sdf = new SimpleDateFormat("dd MMM, yyyy");
+        datebtn.setText(sdf.format(new java.util.Date()));
 
         mDialog = new LBProcessDialog(this);
 
@@ -136,6 +148,30 @@ public class OrdersActivity extends ListActivity {
         Intent intent = new Intent(this, TaskActivity.class);
         startActivity(intent);
     }
+
+    public void changedate(View view) {
+        showDialog(999);
+    }
+
+    @Override
+    protected Dialog onCreateDialog(int id) {
+        if (id == 999) {
+            return new DatePickerDialog(this, myDateListener, year, month, day);
+        }
+        return null;
+    }
+
+    private DatePickerDialog.OnDateSetListener myDateListener = new DatePickerDialog.OnDateSetListener() {
+        @Override
+        public void onDateSet(DatePicker arg0, int arg1, int arg2, int arg3) {
+            // arg1 = year
+            // arg2 = month
+            // arg3 = day
+
+            Button datebtn = (Button) findViewById(R.id.datebtn);
+            datebtn.setText(arg3 +" "+arg2+", "+arg1);
+        }
+    };
 
     private  void initializeSwtich(){
         Firebase loggedinref = new Firebase(getString(R.string.friebaseurl)+"accounts/"+accountID+"/orders/"+deviceID+"/"+currentDate+"/Loggedin");
