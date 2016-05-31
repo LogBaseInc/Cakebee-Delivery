@@ -65,7 +65,7 @@ public class OrderDetailActivity extends Activity implements ConnectionCallbacks
         accountID = sharedPref.getString("accountID", null);
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
-        currentDate = sdf.format(new java.util.Date());
+        currentDate = sharedPref.getString("calendarDate", sdf.format(new java.util.Date()));
 
         isStartedEnabled = sharedPref.getBoolean("startEnabled", false);
         isDeliverEnabled = sharedPref.getBoolean("deliverEnabled", true);

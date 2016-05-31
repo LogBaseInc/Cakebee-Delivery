@@ -25,6 +25,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import java.io.IOException;
+import java.text.ParseException;
+import java.util.Date;
 import java.util.Map.Entry;
 import java.util.Iterator;
 import java.util.List;
@@ -42,7 +44,7 @@ import android.widget.DatePicker;
 public class OrdersActivity extends ListActivity {
     List<OrderDetails> orderDetaillist;
     Context context;
-    String currentDate;
+    String currentDate = null;
     LBProcessDialog mDialog = null;
     boolean doubleBackToExitPressedOnce = false;
     String deviceID;
@@ -58,6 +60,8 @@ public class OrdersActivity extends ListActivity {
     int pickedupordercount = 0;
     private Calendar calendar;
     private int year, month, day;
+    final int DATE_PICKER_ID = 1;
+    private DatePickerDialog datePickerDialog = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,14 +69,41 @@ public class OrdersActivity extends ListActivity {
         setContentView(R.layout.orders);
         context = this;
 
-        calendar = Calendar.getInstance();
-        year = calendar.get(Calendar.YEAR);
-        month = calendar.get(Calendar.MONTH);
-        day = calendar.get(Calendar.DAY_OF_MONTH);
-
+        sharedPref = getSharedPreferences(getString(R.string.app_name), Context.MODE_PRIVATE);
+        String calendarDate = sharedPref.getString("calendarDate", null);
         Button datebtn = (Button) findViewById(R.id.datebtn);
-        SimpleDateFormat sdf = new SimpleDateFormat("dd MMM, yyyy");
-        datebtn.setText(sdf.format(new java.util.Date()));
+
+        if (calendarDate == null) {
+            calendar = Calendar.getInstance();
+            year = calendar.get(Calendar.YEAR);
+            month = calendar.get(Calendar.MONTH);
+            day = calendar.get(Calendar.DAY_OF_MONTH);
+
+            SimpleDateFormat sdf = new SimpleDateFormat("dd MMM, yyyy ");
+            datebtn.setText(sdf.format(new java.util.Date()) + "\uD83D\uDCC5");
+
+            sdf = new SimpleDateFormat("yyyyMMdd");
+            currentDate = sdf.format(new java.util.Date());
+        } else {
+            currentDate = calendarDate;
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+            Date date;
+            try {
+                date = sdf.parse(calendarDate);
+            } catch (ParseException e) {
+                date = new Date();
+            }
+            sdf = new SimpleDateFormat("dd MMM, yyyy");
+            datebtn.setText(sdf.format(date) + "\uD83D\uDCC5");
+
+            SharedPreferences.Editor editor = sharedPref.edit();
+            editor.putString("calendarDate", null);
+            editor.commit();
+
+            year = Integer.parseInt(calendarDate.substring(0,4));
+            month = Integer.parseInt(calendarDate.substring(4,6)) - 1;
+            day = Integer.parseInt(calendarDate.substring(6,8));
+        }
 
         mDialog = new LBProcessDialog(this);
 
@@ -84,9 +115,6 @@ public class OrdersActivity extends ListActivity {
         super.onResume();
         doubleBackToExitPressedOnce = false;
         ((MyApp) context.getApplicationContext()).setCurrentActivity(this);
-
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
-        currentDate = sdf.format(new java.util.Date());
 
         TextView nolist = (TextView) findViewById(R.id.nolist);
         nolist.setVisibility(View.GONE);
@@ -141,6 +169,10 @@ public class OrdersActivity extends ListActivity {
         ListView listView = (ListView) parentRow.getParent();
         int position = listView.getPositionForView(parentRow);
         OrderDetails orderDetail = orderDetaillist.get(position);
+
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putString("calendarDate", currentDate);
+        editor.commit();
         showOrderDetails(orderDetail);
     }
 
@@ -150,31 +182,58 @@ public class OrdersActivity extends ListActivity {
     }
 
     public void changedate(View view) {
-        showDialog(999);
+        showDialog(DATE_PICKER_ID);
     }
 
     @Override
     protected Dialog onCreateDialog(int id) {
-        if (id == 999) {
-            return new DatePickerDialog(this, myDateListener, year, month, day);
+        switch (id) {
+            case DATE_PICKER_ID:
+
+                // open datepicker dialog.
+                // set date picker for current date
+                // add pickerListener listner to date picker
+                if (datePickerDialog == null) {
+                    datePickerDialog = new DatePickerDialog(this, pickerListener, year, month, day);
+                }
+                return datePickerDialog;
         }
         return null;
     }
 
-    private DatePickerDialog.OnDateSetListener myDateListener = new DatePickerDialog.OnDateSetListener() {
-        @Override
-        public void onDateSet(DatePicker arg0, int arg1, int arg2, int arg3) {
-            // arg1 = year
-            // arg2 = month
-            // arg3 = day
+    private DatePickerDialog.OnDateSetListener pickerListener = new DatePickerDialog.OnDateSetListener() {
 
-            Button datebtn = (Button) findViewById(R.id.datebtn);
-            datebtn.setText(arg3 +" "+arg2+", "+arg1);
+        // when dialog box is closed, below method will be called.
+        @Override
+        public void onDateSet(DatePicker view, int selectedYear,
+                              int selectedMonth, int selectedDay) {
+
+            year  = selectedYear;
+            month = selectedMonth;
+            day   = selectedDay;
+            Date date;
+
+            System.out.println("Selected date " + year + " " + month + " " + day);
+            Button calendarBtn = (Button) findViewById(R.id.datebtn);
+            SimpleDateFormat format = new SimpleDateFormat("yyyy MM dd");
+            try {
+                date = format.parse(year + " " + (month + 1) +  " " + day);
+            } catch (ParseException e) {
+                date = new Date();
+            }
+            SimpleDateFormat sdf = new SimpleDateFormat("dd MMM, yyyy ");
+            calendarBtn.setText(sdf.format(date) + 	"\uD83D\uDCC5");
+
+            sdf = new SimpleDateFormat("yyyyMMdd");
+            currentDate = sdf.format(date);
+            getOrders();
         }
     };
 
     private  void initializeSwtich(){
-        Firebase loggedinref = new Firebase(getString(R.string.friebaseurl)+"accounts/"+accountID+"/orders/"+deviceID+"/"+currentDate+"/Loggedin");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+        String currentDateInt = sdf.format(new java.util.Date());
+        Firebase loggedinref = new Firebase(getString(R.string.friebaseurl)+"accounts/"+accountID+"/orders/"+deviceID+"/"+currentDateInt+"/Loggedin");
         loggedinref.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot snapshot) {
@@ -229,6 +288,7 @@ public class OrdersActivity extends ListActivity {
         TextView title = (TextView)findViewById(R.id.title);
         title.setText((accountname.substring(0, 1).toUpperCase() + accountname.substring(1)) + " Deliveries");
 
+        System.out.println(getString(R.string.friebaseurl)+"accounts/"+accountID+"/orders/"+deviceID+"/"+currentDate);
         Firebase myFirebaseRef = new Firebase(getString(R.string.friebaseurl)+"accounts/"+accountID+"/orders/"+deviceID+"/"+currentDate);
         myFirebaseRef.addValueEventListener(new ValueEventListener() {
             @Override
