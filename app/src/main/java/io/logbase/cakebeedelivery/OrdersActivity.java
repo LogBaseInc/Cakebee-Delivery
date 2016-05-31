@@ -93,7 +93,7 @@ public class OrdersActivity extends ListActivity {
             } catch (ParseException e) {
                 date = new Date();
             }
-            sdf = new SimpleDateFormat("dd MMM, yyyy");
+            sdf = new SimpleDateFormat("dd MMM, yyyy ");
             datebtn.setText(sdf.format(date) + "\uD83D\uDCC5");
 
             SharedPreferences.Editor editor = sharedPref.edit();
